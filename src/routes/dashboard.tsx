@@ -43,7 +43,7 @@ function DashboardLayout() {
           {navItems.map((item) => (
             <Link
               key={item.to}
-              to={item.to}
+              to={item.to as "/dashboard"}
               activeOptions={{ exact: item.exact ?? false }}
               className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground data-[status=active]:bg-primary data-[status=active]:text-primary-foreground"
             >
