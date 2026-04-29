@@ -19,13 +19,13 @@ function DashboardLayout() {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
   }
 
-  const navItems = [
+  const navItems: Array<{ to: string; label: string; exact?: boolean }> = [
     { to: "/dashboard", label: "Home", exact: true },
     { to: "/dashboard/journal", label: "Journal" },
     { to: "/dashboard/mood", label: "Mood Log" },
     { to: "/dashboard/surveys", label: "Surveys" },
     { to: "/dashboard/chatbot", label: "Chatbot" },
-  ] as const;
+  ];
 
   return (
     <div className="min-h-screen bg-background">
