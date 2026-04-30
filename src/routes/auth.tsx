@@ -69,7 +69,15 @@ function AuthPage() {
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          const msg = error.message?.toLowerCase() ?? "";
+          if (msg.includes("invalid login") || msg.includes("invalid credentials")) {
+            setError("No account found with these details. Please sign up first.");
+            setMode("signup");
+            return;
+          }
+          throw error;
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
