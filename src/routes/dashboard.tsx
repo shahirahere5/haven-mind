@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { PageLoader } from "@/components/PageLoader";
+import { Footer } from "@/components/Footer";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,
@@ -27,13 +29,7 @@ function DashboardLayout() {
       .then(({ data }) => setName(data?.name ?? null));
   }, [user]);
 
-  if (loading || !session) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Loading your safe space…
-      </div>
-    );
-  }
+  if (loading || !session) return <PageLoader />;
 
   const navItems: Array<{ to: string; label: string; exact?: boolean }> = [
     { to: "/dashboard", label: "Home", exact: true },
@@ -44,35 +40,39 @@ function DashboardLayout() {
   ];
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-border/50 bg-card/60 backdrop-blur-md">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <h1 className="text-lg font-semibold tracking-tight">🌸 MindHaven</h1>
-          <div className="flex items-center gap-3">
+    <div className="flex min-h-screen flex-col">
+      <header className="sticky top-0 z-40 border-b border-border/40 glass">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <Link to="/dashboard" className="flex items-center gap-2.5 group">
+            <span className="text-2xl transition-transform group-hover:scale-110">🌸</span>
+            <span className="font-display text-2xl font-semibold text-gradient">MindHaven</span>
+          </Link>
+          <div className="flex items-center gap-4">
             <span className="hidden text-sm text-muted-foreground sm:inline">
               {name ? `Hi, ${name}` : user?.email}
             </span>
-            <Button variant="outline" size="sm" onClick={() => signOut()}>
+            <Button variant="outline" size="sm" onClick={() => signOut()} className="rounded-full">
               Sign out
             </Button>
           </div>
         </div>
-        <nav className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 pb-2">
+        <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-6 pb-3">
           {navItems.map((item) => (
             <Link
               key={item.to}
               to={item.to as "/dashboard"}
               activeOptions={{ exact: item.exact ?? false }}
-              className="rounded-full px-4 py-1.5 text-sm text-muted-foreground transition-all hover:bg-muted hover:text-foreground data-[status=active]:bg-primary data-[status=active]:text-primary-foreground data-[status=active]:shadow-soft"
+              className="rounded-full px-5 py-2 text-sm font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground data-[status=active]:gradient-primary data-[status=active]:text-primary-foreground data-[status=active]:shadow-soft"
             >
               {item.label}
             </Link>
           ))}
         </nav>
       </header>
-      <main className="mx-auto max-w-5xl px-4 py-8 animate-fade-in">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-10 animate-fade-in">
         <Outlet />
       </main>
+      <Footer />
     </div>
   );
 }

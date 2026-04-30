@@ -30,8 +30,8 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Mindful — Journal & Mood Tracker" },
-      { name: "description", content: "Track your moods and journal your thoughts." },
+      { title: "MindHaven — A safe space for your thoughts" },
+      { name: "description", content: "MindHaven is a calming space to journal your thoughts and track your moods, gently." },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),

@@ -1,5 +1,6 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
+import { PageLoader } from "@/components/PageLoader";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -7,8 +8,6 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { session, loading } = useAuth();
-  if (loading) {
-    return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
-  }
+  if (loading) return <PageLoader label="Welcome to MindHaven" />;
   return <Navigate to={session ? "/dashboard" : "/auth"} />;
 }

@@ -79,11 +79,16 @@ function AuthPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-10">
-      <Card className="w-full max-w-md border-0 shadow-soft backdrop-blur-sm bg-card/80 animate-rise">
+    <div className="relative flex min-h-screen items-center justify-center px-4 py-12">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-[oklch(0.85_0.1_295)] opacity-40 blur-3xl animate-float" />
+        <div className="absolute -right-20 bottom-10 h-80 w-80 rounded-full bg-[oklch(0.88_0.08_50)] opacity-40 blur-3xl animate-float" style={{ animationDelay: "2s" }} />
+      </div>
+      <Card className="relative w-full max-w-md border-0 shadow-glow glass animate-rise">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-semibold tracking-tight">
-            🌸 MindHaven
+          <div className="mx-auto mb-2 text-4xl animate-float">🌸</div>
+          <CardTitle className="font-display text-4xl font-semibold tracking-tight text-gradient">
+            MindHaven
           </CardTitle>
           <CardDescription className="text-base">
             {mode === "login"
@@ -158,7 +163,8 @@ function AuthPage() {
             )}
             <Button
               type="submit"
-              className="w-full transition-transform hover:scale-[1.01] active:scale-[0.99]"
+              size="lg"
+              className="w-full gradient-primary shadow-soft transition-transform hover:scale-[1.01] active:scale-[0.99]"
               disabled={loading}
             >
               {loading ? "Please wait…" : mode === "login" ? "Sign in" : "Create my space"}
