@@ -231,7 +231,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calc_sentiment: { Args: { _text: string }; Returns: number }
     }
     Enums: {
       [_ in never]: never
