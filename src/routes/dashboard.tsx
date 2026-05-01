@@ -1,7 +1,6 @@
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { PageLoader } from "@/components/PageLoader";
 import { Footer } from "@/components/Footer";
@@ -35,41 +34,43 @@ function DashboardLayout() {
     { to: "/dashboard", label: "Home", exact: true },
     { to: "/dashboard/journal", label: "Journal" },
     { to: "/dashboard/mood", label: "Mood" },
-    { to: "/dashboard/surveys", label: "Surveys" },
-    { to: "/dashboard/chatbot", label: "Chatbot" },
+    { to: "/dashboard/surveys", label: "Reflections" },
+    { to: "/dashboard/chatbot", label: "Companion" },
   ];
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 border-b border-border/40 glass">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link to="/dashboard" className="flex items-center gap-2.5 group">
-            <span className="text-2xl transition-transform group-hover:scale-110">🌸</span>
-            <span className="font-display text-2xl font-semibold text-gradient">MindHaven</span>
+      <header className="border-b border-border/40">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-8 py-7">
+          <Link to="/dashboard" className="font-display text-2xl italic text-ink">
+            MindHaven
           </Link>
-          <div className="flex items-center gap-4">
-            <span className="hidden text-sm text-muted-foreground sm:inline">
-              {name ? `Hi, ${name}` : user?.email}
+          <div className="flex items-center gap-6">
+            <span className="hidden text-xs italic text-muted-foreground sm:inline">
+              {name ? name : user?.email}
             </span>
-            <Button variant="outline" size="sm" onClick={() => signOut()} className="rounded-full">
+            <button
+              onClick={() => signOut()}
+              className="smallcaps text-muted-foreground transition-colors hover:text-foreground"
+            >
               Sign out
-            </Button>
+            </button>
           </div>
         </div>
-        <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-6 pb-3">
+        <nav className="mx-auto flex max-w-4xl gap-8 overflow-x-auto px-8 pb-5">
           {navItems.map((item) => (
             <Link
               key={item.to}
               to={item.to as "/dashboard"}
               activeOptions={{ exact: item.exact ?? false }}
-              className="rounded-full px-5 py-2 text-sm font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground data-[status=active]:gradient-primary data-[status=active]:text-primary-foreground data-[status=active]:shadow-soft"
+              className="smallcaps text-muted-foreground/70 transition-colors hover:text-foreground data-[status=active]:text-foreground"
             >
               {item.label}
             </Link>
           ))}
         </nav>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-10 animate-fade-in">
+      <main className="mx-auto w-full max-w-4xl flex-1 px-8 py-16 animate-fade-in">
         <Outlet />
       </main>
       <Footer />
