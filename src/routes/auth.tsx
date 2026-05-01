@@ -5,7 +5,6 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/auth")({
@@ -46,33 +45,25 @@ function AuthPage() {
         });
         if (error) throw error;
 
-        // Upsert profile with full details (id = auth.uid())
         if (data.user) {
           const ageNum = age ? Number(age) : null;
           await supabase.from("Profiles").upsert(
-            {
-              id: data.user.id,
-              name,
-              age: ageNum,
-              gender: gender || null,
-              role: "user",
-            },
+            { id: data.user.id, name, age: ageNum, gender: gender || null, role: "user" },
             { onConflict: "id" },
           );
         }
 
         if (data.session) {
-          // Auto-logged in
-          setInfo("Welcome to MindHaven 💛 Check your email to verify your account.");
+          setInfo("A quiet space has been prepared for you.");
         } else {
-          setInfo("Check your email to verify your account ✉️");
+          setInfo("A quiet space has been prepared for you. Please verify your email.");
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           const msg = error.message?.toLowerCase() ?? "";
           if (msg.includes("invalid login") || msg.includes("invalid credentials")) {
-            setError("No account found with these details. Please sign up first.");
+            setError("We don't recognise this. Please create an account first.");
             setMode("signup");
             return;
           }
@@ -80,104 +71,96 @@ function AuthPage() {
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : "Something went quiet. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center px-4 py-12">
+    <div className="relative flex min-h-screen items-center justify-center px-6 py-16">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-[oklch(0.85_0.1_295)] opacity-40 blur-3xl animate-float" />
-        <div className="absolute -right-20 bottom-10 h-80 w-80 rounded-full bg-[oklch(0.88_0.08_50)] opacity-40 blur-3xl animate-float" style={{ animationDelay: "2s" }} />
+        <div className="absolute left-1/2 top-0 h-[60vh] w-[60vh] -translate-x-1/2 rounded-full bg-[oklch(0.6_0.08_60)] opacity-[0.08] blur-3xl" />
       </div>
-      <Card className="relative w-full max-w-md border-0 shadow-glow glass animate-rise">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-2 text-4xl animate-float">🌸</div>
-          <CardTitle className="font-display text-4xl font-semibold tracking-tight text-gradient">
-            MindHaven
-          </CardTitle>
-          <CardDescription className="text-base">
+
+      <div className="relative w-full max-w-sm animate-rise">
+        <div className="mb-12 text-center">
+          <p className="smallcaps text-muted-foreground">MindHaven</p>
+          <h1 className="mt-4 font-display text-4xl italic text-ink">
+            {mode === "login" ? "Welcome back." : "Begin, gently."}
+          </h1>
+          <p className="mt-3 text-sm text-muted-foreground">
             {mode === "login"
-              ? "Welcome back. Your thoughts are safe here."
-              : "A safe space for your thoughts. Take your time."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === "signup" && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="name">Your name</Label>
-                  <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="age">Age</Label>
-                    <Input
-                      id="age"
-                      type="number"
-                      min={1}
-                      max={120}
-                      value={age}
-                      onChange={(e) => setAge(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="gender">Gender</Label>
-                    <Select value={gender} onValueChange={setGender}>
-                      <SelectTrigger id="gender">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="female">Female</SelectItem>
-                        <SelectItem value="male">Male</SelectItem>
-                        <SelectItem value="non-binary">Non-binary</SelectItem>
-                        <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-              />
-            </div>
-            {error && <p className="text-sm text-destructive animate-fade-in">{error}</p>}
-            {info && (
-              <p className="rounded-lg bg-secondary/60 p-3 text-sm text-secondary-foreground animate-fade-in">
-                {info}
-              </p>
-            )}
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full gradient-primary shadow-soft transition-transform hover:scale-[1.01] active:scale-[0.99]"
-              disabled={loading}
-            >
-              {loading ? "Please wait…" : mode === "login" ? "Sign in" : "Create my space"}
-            </Button>
-          </form>
+              ? "Your thoughts remain yours."
+              : "Nothing here is rushed. You may begin when ready."}
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {mode === "signup" && (
+            <>
+              <Field label="Your name">
+                <Input value={name} onChange={(e) => setName(e.target.value)} required className="quiet-input" />
+              </Field>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Age">
+                  <Input
+                    type="number"
+                    min={1}
+                    max={120}
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    required
+                    className="quiet-input"
+                  />
+                </Field>
+                <Field label="Gender">
+                  <Select value={gender} onValueChange={setGender}>
+                    <SelectTrigger className="quiet-input">
+                      <SelectValue placeholder="—" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="non-binary">Non-binary</SelectItem>
+                      <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+            </>
+          )}
+          <Field label="Email">
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="quiet-input" />
+          </Field>
+          <Field label="Password">
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              className="quiet-input"
+            />
+          </Field>
+
+          {error && <p className="text-sm italic text-destructive/90 animate-fade-in">{error}</p>}
+          {info && (
+            <p className="border-l-2 border-primary/50 pl-4 text-sm italic text-foreground/80 animate-fade-in">
+              {info}
+            </p>
+          )}
+
+          <Button
+            type="submit"
+            disabled={loading}
+            className="mt-2 h-11 w-full rounded-none border border-border bg-transparent font-sans text-sm font-normal tracking-[0.18em] uppercase text-foreground transition-colors hover:bg-foreground hover:text-background"
+          >
+            {loading ? "One moment…" : mode === "login" ? "Enter" : "Prepare my space"}
+          </Button>
+        </form>
+
+        <div className="mt-10 text-center">
           <button
             type="button"
             onClick={() => {
@@ -185,12 +168,40 @@ function AuthPage() {
               setError(null);
               setInfo(null);
             }}
-            className="mt-4 w-full text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="text-xs italic text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
           >
-            {mode === "login" ? "New here? Create an account" : "Already have an account? Sign in"}
+            {mode === "login" ? "I don't have an account yet" : "I already have an account"}
           </button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
+      <style>{`
+        .quiet-input {
+          background: transparent !important;
+          border: none !important;
+          border-bottom: 1px solid var(--color-border) !important;
+          border-radius: 0 !important;
+          box-shadow: none !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          font-family: var(--font-display);
+          font-size: 1.05rem;
+          height: 2.5rem;
+        }
+        .quiet-input:focus, .quiet-input:focus-visible {
+          outline: none !important;
+          border-bottom-color: var(--lamp) !important;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="smallcaps text-muted-foreground">{label}</Label>
+      {children}
     </div>
   );
 }
