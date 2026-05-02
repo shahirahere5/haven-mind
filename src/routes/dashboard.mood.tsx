@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { Textarea } from "@/components/ui/textarea";
 import { InlineLoader } from "@/components/PageLoader";
 
 export const Route = createFileRoute("/dashboard/mood")({
@@ -63,97 +62,101 @@ function MoodPage() {
     if (error) setError(error.message);
     else {
       setMood(null); setNote("");
-      setSuccess(true); setTimeout(() => setSuccess(false), 2200);
+      setSuccess(true); setTimeout(() => setSuccess(false), 2800);
       await load();
     }
     setSubmitting(false);
   };
 
   return (
-    <div className="space-y-24">
-      <header className="animate-rise">
-        <p className="smallcaps text-muted-foreground">A pause</p>
-        <h1 className="mt-5 font-display text-5xl italic text-ink">How is the air today?</h1>
-        <p className="mt-4 max-w-xl italic text-muted-foreground">
+    <div className="space-y-28">
+      <header className="animate-rise text-center">
+        <p className="smallcaps text-muted-foreground/50">A pause</p>
+        <h1 className="mt-6 font-display text-6xl italic text-ink leading-[1.1] sm:text-7xl">
+          How is the air<br />today?
+        </h1>
+        <p className="mx-auto mt-6 max-w-md italic text-muted-foreground/60" style={{ lineHeight: "1.9" }}>
           There is no wrong answer here. Only the one that is true.
         </p>
       </header>
 
-      <form onSubmit={submit} className="space-y-12 animate-slow">
-        <div className="space-y-5">
-          <p className="smallcaps text-muted-foreground">Choose what fits</p>
-          <div className="flex flex-wrap items-baseline gap-x-10 gap-y-4">
-            {MOODS.map((m) => (
-              <button
-                key={m.level}
-                type="button"
-                onClick={() => setMood(m.level)}
-                className={`font-display text-2xl italic transition-colors ${
-                  mood === m.level
-                    ? "text-lamp underline decoration-lamp/40 underline-offset-8"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
+      <form onSubmit={submit} className="space-y-14 animate-slow">
+        <div className="flex flex-wrap items-baseline justify-center gap-x-12 gap-y-5">
+          {MOODS.map((m) => (
+            <button
+              key={m.level}
+              type="button"
+              onClick={() => setMood(m.level)}
+              className={`font-display text-3xl italic transition-all duration-500 ${
+                mood === m.level
+                  ? "text-lamp underline decoration-lamp/30 underline-offset-8"
+                  : "text-muted-foreground/50 hover:text-foreground/70"
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
         </div>
 
-        <div className="space-y-3">
-          <p className="smallcaps text-muted-foreground">A note, if you wish</p>
-          <Textarea
+        <div>
+          <p className="smallcaps text-center text-muted-foreground/40 mb-4">A note, if you wish</p>
+          <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="What is shaping the day?"
             rows={3}
             maxLength={500}
-            className="prose-journal w-full resize-none border-0 border-b border-border bg-transparent px-0 py-3 text-base placeholder:italic placeholder:text-muted-foreground/60 focus-visible:border-b-foreground/50 focus-visible:ring-0 focus-visible:outline-none shadow-none"
+            className="prose-journal w-full resize-none border-0 bg-transparent px-0 py-2 text-foreground/85 placeholder:italic placeholder:text-muted-foreground/35 focus:outline-none focus:ring-0"
+            style={{ lineHeight: "2", caretColor: "var(--lamp)" }}
           />
         </div>
 
-        <div className="flex items-center justify-between border-t border-border/40 pt-6">
-          <p className="text-xs italic text-muted-foreground/70">{note.length} / 500</p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs italic text-muted-foreground/30">{note.length} / 500</p>
           <button
             type="submit"
             disabled={submitting || mood === null}
-            className="smallcaps text-foreground transition-colors hover:text-lamp disabled:cursor-not-allowed disabled:text-muted-foreground/40"
+            className="smallcaps text-foreground/70 transition-all duration-500 hover:text-lamp disabled:cursor-not-allowed disabled:text-muted-foreground/25"
           >
             {submitting ? "Keeping…" : "Note this moment"}
           </button>
         </div>
 
-        {error && <p className="text-sm italic text-destructive/80 animate-fade-in">{error}</p>}
+        {error && <p className="text-sm italic text-destructive/60 animate-fade-in">{error}</p>}
         {success && (
-          <p className="border-l-2 border-primary/40 pl-4 text-sm italic text-foreground/80 animate-fade-in">
+          <p className="text-center text-sm italic text-foreground/50 animate-fade-in">
             Noted.
           </p>
         )}
       </form>
 
+      <div className="rule" />
+
       <section className="space-y-8">
-        <div className="flex items-baseline justify-between border-b border-border/40 pb-4">
-          <h2 className="font-display text-3xl italic text-ink">Recent</h2>
-          <p className="smallcaps text-muted-foreground">{logs.length} noticed</p>
+        <div className="flex items-baseline justify-between">
+          <h2 className="font-display text-4xl italic text-ink">Recent</h2>
+          <p className="smallcaps text-muted-foreground/40">{logs.length} noticed</p>
         </div>
 
         {loading ? (
           <InlineLoader />
         ) : logs.length === 0 ? (
-          <p className="py-12 text-center text-sm italic text-muted-foreground">
+          <p className="py-16 text-center font-display text-lg italic text-muted-foreground/40">
             Nothing yet. Begin when you wish.
           </p>
         ) : (
-          <div className="divide-y divide-border/30">
+          <div className="space-y-0 mt-8">
             {logs.map((log, i) => (
               <div
                 key={log.id}
-                className="grid grid-cols-[auto_1fr_auto] items-baseline gap-6 py-5 animate-fade-in"
-                style={{ animationDelay: `${i * 30}ms` }}
+                className="flex items-baseline justify-between py-6 animate-fade-in"
+                style={{ animationDelay: `${i * 40}ms` }}
               >
-                <p className="font-display text-xl italic text-ink w-28">{moodLabel(log.mood_level)}</p>
-                <p className="text-sm italic text-foreground/70">{log.note ?? <span className="text-muted-foreground/60">—</span>}</p>
-                <p className="smallcaps text-muted-foreground">
+                <p className="font-display text-xl italic text-ink/80 w-28">{moodLabel(log.mood_level)}</p>
+                <p className="flex-1 text-sm italic text-foreground/50 px-6">
+                  {log.note ?? <span className="text-muted-foreground/25">—</span>}
+                </p>
+                <p className="smallcaps text-muted-foreground/35">
                   {new Date(log.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                 </p>
               </div>

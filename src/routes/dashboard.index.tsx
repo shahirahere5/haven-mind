@@ -33,38 +33,37 @@ function DashboardHome() {
   ];
 
   return (
-    <div className="space-y-20">
-      <section className="animate-rise">
-        <p className="smallcaps text-muted-foreground">{today}</p>
-        <h1 className="mt-6 font-display text-5xl italic text-ink sm:text-6xl">
-          Welcome back{name ? `, ${name}` : ""}.
+    <div className="space-y-24">
+      <section className="animate-rise text-center">
+        <p className="smallcaps text-muted-foreground/50">{today}</p>
+        <h1 className="mt-8 font-display text-6xl italic text-ink sm:text-7xl leading-[1.08]">
+          Welcome back{name ? `,` : "."}<br />
+          {name && <span className="text-lamp/80">{name}.</span>}
         </h1>
-        <p className="mt-6 max-w-xl text-lg italic text-muted-foreground">
+        <p className="mx-auto mt-8 max-w-md text-lg italic text-muted-foreground/60" style={{ lineHeight: "1.9" }}>
           Take a moment. You're here now.
         </p>
       </section>
 
-      <div className="rule" />
-
-      <section className="grid gap-12 sm:grid-cols-3 animate-slow">
-        <Stat label="Entries written" value={stats.entries} />
-        <Stat label="Moods noticed" value={stats.moods} />
-        <Stat label="Days kept" value={Math.max(stats.entries, stats.moods)} />
+      <section className="flex justify-center gap-20 animate-slow">
+        <Stat label="Entries" value={stats.entries} />
+        <Stat label="Moods" value={stats.moods} />
       </section>
 
       <div className="rule" />
 
-      <section className="space-y-8 animate-slow">
+      <section className="space-y-0 animate-slow">
         {links.map((l) => (
           <Link
             key={l.to}
             to={l.to as "/dashboard"}
-            className="group block border-b border-border/40 pb-8 transition-colors hover:border-foreground/40"
+            className="group block py-10 transition-all duration-500"
           >
-            <p className="font-display text-3xl italic text-ink transition-colors group-hover:text-lamp">
-              {l.label} <span className="ml-1 inline-block transition-transform group-hover:translate-x-1">→</span>
+            <p className="font-display text-3xl italic text-ink/80 transition-all duration-500 group-hover:text-lamp sm:text-4xl">
+              {l.label}
+              <span className="ml-2 inline-block text-muted-foreground/30 transition-all duration-500 group-hover:translate-x-2 group-hover:text-lamp/50">→</span>
             </p>
-            <p className="mt-2 text-sm italic text-muted-foreground">{l.sub}</p>
+            <p className="mt-3 text-sm italic text-muted-foreground/40">{l.sub}</p>
           </Link>
         ))}
       </section>
@@ -74,9 +73,9 @@ function DashboardHome() {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div>
-      <p className="smallcaps text-muted-foreground">{label}</p>
-      <p className="mt-3 font-display text-5xl italic text-ink">{value}</p>
+    <div className="text-center">
+      <p className="font-display text-5xl italic text-ink">{value}</p>
+      <p className="mt-2 smallcaps text-muted-foreground/40">{label}</p>
     </div>
   );
 }
