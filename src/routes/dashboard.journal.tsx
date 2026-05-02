@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { Textarea } from "@/components/ui/textarea";
 import { InlineLoader } from "@/components/PageLoader";
 
 export const Route = createFileRoute("/dashboard/journal")({
@@ -84,45 +83,54 @@ function JournalPage() {
     if (error) setError(error.message);
     else {
       setText(""); setEmotion("");
-      setSuccess(true); setTimeout(() => setSuccess(false), 2400);
+      setSuccess(true); setTimeout(() => setSuccess(false), 3000);
       await load();
     }
     setSubmitting(false);
   };
 
   return (
-    <div className="space-y-24">
-      <header className="animate-rise">
-        <p className="smallcaps text-muted-foreground">The journal</p>
-        <h1 className="mt-5 font-display text-5xl italic text-ink">A page kept for you.</h1>
-        <p className="mt-4 max-w-xl text-base italic text-muted-foreground">
+    <div className="space-y-28">
+      {/* Header — editorial, quiet */}
+      <header className="animate-rise text-center">
+        <p className="smallcaps text-muted-foreground/60">The journal</p>
+        <h1 className="mt-6 font-display text-6xl italic text-ink leading-[1.1] sm:text-7xl">
+          A page kept<br />for you.
+        </h1>
+        <p className="mx-auto mt-6 max-w-md text-base italic text-muted-foreground/70" style={{ lineHeight: "1.9" }}>
           Your thoughts remain yours. No one else will see this.
         </p>
       </header>
 
-      <form onSubmit={submit} className="space-y-8 animate-slow">
-        <Textarea
+      {/* Writing canvas — no borders, no box, just text */}
+      <form onSubmit={submit} className="animate-slow">
+        <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Write what you couldn't say out loud."
-          rows={12}
+          placeholder="Write what you couldn't say out loud…"
+          rows={16}
           required
           maxLength={5000}
-          className="prose-journal w-full resize-none border-0 border-b border-border bg-transparent px-0 py-4 placeholder:italic placeholder:text-muted-foreground/60 focus-visible:border-b-foreground/50 focus-visible:ring-0 focus-visible:outline-none shadow-none"
-          style={{ minHeight: "16rem" }}
+          className="prose-journal w-full resize-none border-0 bg-transparent px-0 py-0 text-foreground/90 placeholder:italic placeholder:text-muted-foreground/40 focus:outline-none focus:ring-0"
+          style={{
+            minHeight: "22rem",
+            caretColor: "var(--lamp)",
+            lineHeight: "2.1",
+            letterSpacing: "0.01em",
+          }}
         />
 
-        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-3">
-          <p className="smallcaps text-muted-foreground">A word for it</p>
+        <div className="mt-10 flex flex-wrap items-baseline gap-x-8 gap-y-3">
+          <p className="smallcaps text-muted-foreground/50">A word for it</p>
           {EMOTIONS.map((em) => (
             <button
               key={em.value}
               type="button"
               onClick={() => setEmotion(emotion === em.value ? "" : em.value)}
-              className={`font-display text-base italic transition-colors ${
+              className={`font-display text-base italic transition-all duration-500 ${
                 emotion === em.value
-                  ? "text-lamp underline decoration-lamp/40 underline-offset-4"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "text-lamp underline decoration-lamp/30 underline-offset-4"
+                  : "text-muted-foreground/60 hover:text-foreground/80"
               }`}
             >
               {em.label}
@@ -130,66 +138,75 @@ function JournalPage() {
           ))}
         </div>
 
-        <div className="flex items-center justify-between border-t border-border/40 pt-6">
-          <p className="text-xs italic text-muted-foreground/70">{text.length} / 5000</p>
+        <div className="mt-8 flex items-center justify-between">
+          <p className="text-xs italic text-muted-foreground/40">{text.length} / 5 000</p>
           <button
             type="submit"
             disabled={submitting || !text.trim()}
-            className="smallcaps text-foreground transition-colors hover:text-lamp disabled:cursor-not-allowed disabled:text-muted-foreground/40"
+            className="smallcaps text-foreground/80 transition-all duration-500 hover:text-lamp disabled:cursor-not-allowed disabled:text-muted-foreground/30"
           >
-            {submitting ? "Keeping…" : "Keep this entry"}
+            {submitting ? "Keeping…" : "Keep this"}
           </button>
         </div>
 
-        {error && <p className="text-sm italic text-destructive/80 animate-fade-in">{error}</p>}
+        {error && <p className="mt-6 text-sm italic text-destructive/70 animate-fade-in">{error}</p>}
         {success && (
-          <p className="border-l-2 border-primary/40 pl-4 text-sm italic text-foreground/80 animate-fade-in">
+          <p className="mt-6 text-sm italic text-foreground/60 animate-fade-in">
             Kept. Thank you for trusting the page.
           </p>
         )}
       </form>
 
-      <section className="space-y-12">
-        <div className="flex items-baseline justify-between border-b border-border/40 pb-4">
-          <h2 className="font-display text-3xl italic text-ink">Earlier pages</h2>
-          <p className="smallcaps text-muted-foreground">{entries.length} kept</p>
+      {/* Divider */}
+      <div className="rule" />
+
+      {/* Earlier entries — flowing text, not cards */}
+      <section className="space-y-6">
+        <div className="flex items-baseline justify-between">
+          <h2 className="font-display text-4xl italic text-ink">Earlier pages</h2>
+          <p className="smallcaps text-muted-foreground/50">{entries.length} kept</p>
         </div>
 
         {loading ? (
           <InlineLoader />
         ) : entries.length === 0 ? (
-          <p className="py-12 text-center text-sm italic text-muted-foreground">
+          <p className="py-16 text-center font-display text-lg italic text-muted-foreground/50">
             Nothing yet. You may begin when ready.
           </p>
         ) : (
-          <div className="space-y-16">
+          <div className="space-y-20 mt-12">
             {entries.map((entry, i) => {
               const tone = sentimentLabel(entry.sentiment_score);
               return (
                 <article
                   key={entry.id}
                   className="animate-rise"
-                  style={{ animationDelay: `${i * 60}ms` }}
+                  style={{ animationDelay: `${i * 80}ms` }}
                 >
-                  <div className="flex items-baseline justify-between border-b border-border/30 pb-3">
-                    <p className="font-display text-lg italic text-foreground/80">
+                  <div className="flex items-baseline justify-between mb-6">
+                    <p className="font-display text-lg italic text-foreground/50">
                       {formatDate(entry.created_at)}
                     </p>
-                    <p className="smallcaps text-muted-foreground">{formatTime(entry.created_at)}</p>
+                    <p className="smallcaps text-muted-foreground/40">{formatTime(entry.created_at)}</p>
                   </div>
-                  <p className="prose-journal mt-6 whitespace-pre-wrap text-foreground/90">{entry.text}</p>
+                  <p
+                    className="prose-journal whitespace-pre-wrap text-foreground/85"
+                    style={{ lineHeight: "2.1", letterSpacing: "0.01em" }}
+                  >
+                    {entry.text}
+                  </p>
                   {(entry.emotion || tone) && (
-                    <div className="mt-6 flex items-center gap-6 text-xs italic text-muted-foreground">
+                    <div className="mt-8 flex items-center gap-8 text-xs italic text-muted-foreground/50">
                       {entry.emotion && (
                         <span>
-                          A word — <span className="text-foreground/70">{EMOTIONS.find(e => e.value === entry.emotion)?.label ?? entry.emotion}</span>
+                          {EMOTIONS.find(e => e.value === entry.emotion)?.label ?? entry.emotion}
                         </span>
                       )}
                       {tone && (
                         <span>
-                          Tone — <span className="text-foreground/70">{tone}</span>
+                          {tone}
                           {entry.sentiment_score !== null && (
-                            <span className="ml-1 text-muted-foreground/60">({entry.sentiment_score.toFixed(2)})</span>
+                            <span className="ml-1 text-muted-foreground/30">({entry.sentiment_score.toFixed(2)})</span>
                           )}
                         </span>
                       )}

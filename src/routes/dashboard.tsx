@@ -28,7 +28,7 @@ function DashboardLayout() {
       .then(({ data }) => setName(data?.name ?? null));
   }, [user]);
 
-  if (loading || !session) return <PageLoader />;
+  if (loading || !session) return <PageLoader label="Returning…" minMs={2000} />;
 
   const navItems: Array<{ to: string; label: string; exact?: boolean }> = [
     { to: "/dashboard", label: "Home", exact: true },
@@ -40,37 +40,37 @@ function DashboardLayout() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-border/40">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-8 py-7">
-          <Link to="/dashboard" className="font-display text-2xl italic text-ink">
+      <header className="border-b border-border/30">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-8 py-8">
+          <Link to="/dashboard" className="font-display text-2xl italic text-ink/80">
             MindHaven
           </Link>
           <div className="flex items-center gap-6">
-            <span className="hidden text-xs italic text-muted-foreground sm:inline">
+            <span className="hidden text-xs italic text-muted-foreground/50 sm:inline">
               {name ? name : user?.email}
             </span>
             <button
               onClick={() => signOut()}
-              className="smallcaps text-muted-foreground transition-colors hover:text-foreground"
+              className="smallcaps text-muted-foreground/50 transition-all duration-500 hover:text-foreground"
             >
-              Sign out
+              Leave quietly
             </button>
           </div>
         </div>
-        <nav className="mx-auto flex max-w-4xl gap-8 overflow-x-auto px-8 pb-5">
+        <nav className="mx-auto flex max-w-3xl gap-10 overflow-x-auto px-8 pb-6">
           {navItems.map((item) => (
             <Link
               key={item.to}
               to={item.to as "/dashboard"}
               activeOptions={{ exact: item.exact ?? false }}
-              className="smallcaps text-muted-foreground/70 transition-colors hover:text-foreground data-[status=active]:text-foreground"
+              className="smallcaps text-muted-foreground/40 transition-all duration-500 hover:text-foreground/80 data-[status=active]:text-foreground/90"
             >
               {item.label}
             </Link>
           ))}
         </nav>
       </header>
-      <main className="mx-auto w-full max-w-4xl flex-1 px-8 py-16 animate-fade-in">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-8 py-20 animate-fade-in">
         <Outlet />
       </main>
       <Footer />
