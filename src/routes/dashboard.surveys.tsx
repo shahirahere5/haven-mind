@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { InlineLoader } from "@/components/PageLoader";
-import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/dashboard/surveys")({
   component: SurveysPage,
@@ -110,7 +109,7 @@ function SurveysPage() {
       setTimeout(() => {
         setOpenId(null);
         setMessage(null);
-      }, 1600);
+      }, 2000);
     }
     setSubmitting(false);
   };
@@ -122,38 +121,40 @@ function SurveysPage() {
   if (openSurvey) {
     const qs = questions[openSurvey.id] ?? [];
     return (
-      <div className="space-y-16 animate-fade-in">
-        <header>
+      <div className="space-y-20 animate-fade-in">
+        <header className="text-center">
           <button
             onClick={() => setOpenId(null)}
-            className="smallcaps text-muted-foreground transition-colors hover:text-foreground"
+            className="smallcaps text-muted-foreground/40 transition-all duration-500 hover:text-foreground/70"
           >
-            ← Back to reflections
+            ← Back
           </button>
-          <h1 className="mt-8 font-display text-5xl italic text-ink">{openSurvey.title}</h1>
+          <h1 className="mt-10 font-display text-6xl italic text-ink leading-[1.1]">{openSurvey.title}</h1>
           {openSurvey.description && (
-            <p className="mt-4 max-w-xl italic text-muted-foreground">{openSurvey.description}</p>
+            <p className="mx-auto mt-6 max-w-lg italic text-muted-foreground/50" style={{ lineHeight: "1.9" }}>
+              {openSurvey.description}
+            </p>
           )}
         </header>
 
-        <div className="space-y-16">
+        <div className="space-y-20">
           {qs.map((q, i) => (
-            <div key={q.id} className="space-y-5 animate-rise" style={{ animationDelay: `${i * 60}ms` }}>
-              <div className="flex items-baseline gap-4">
-                <span className="smallcaps text-muted-foreground/70">{String(i + 1).padStart(2, "0")}</span>
-                <p className="font-display text-2xl italic text-ink">{q.question_text}</p>
+            <div key={q.id} className="animate-rise" style={{ animationDelay: `${i * 80}ms` }}>
+              <div className="flex items-baseline gap-5 mb-6">
+                <span className="smallcaps text-muted-foreground/30">{String(i + 1).padStart(2, "0")}</span>
+                <p className="font-display text-2xl italic text-ink/90" style={{ lineHeight: "1.5" }}>{q.question_text}</p>
               </div>
               {q.question_type === "scale" ? (
-                <div className="ml-10 flex flex-wrap items-baseline gap-x-8 gap-y-3">
+                <div className="ml-12 flex flex-wrap items-baseline gap-x-10 gap-y-4">
                   {SCALE_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
                       onClick={() => setAnswers({ ...answers, [q.id]: opt.value })}
-                      className={`font-display italic transition-colors ${
+                      className={`font-display italic transition-all duration-500 ${
                         answers[q.id] === opt.value
-                          ? "text-lamp underline decoration-lamp/40 underline-offset-8"
-                          : "text-muted-foreground hover:text-foreground"
+                          ? "text-lamp underline decoration-lamp/30 underline-offset-8"
+                          : "text-muted-foreground/50 hover:text-foreground/70"
                       }`}
                     >
                       {opt.label}
@@ -161,12 +162,13 @@ function SurveysPage() {
                   ))}
                 </div>
               ) : (
-                <Textarea
+                <textarea
                   value={(answers[q.id] as string) ?? ""}
                   onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
                   rows={4}
                   placeholder="Take your time…"
-                  className="prose-journal ml-10 w-[calc(100%-2.5rem)] resize-none border-0 border-b border-border bg-transparent px-0 py-2 text-base placeholder:italic placeholder:text-muted-foreground/60 focus-visible:border-b-foreground/50 focus-visible:ring-0 focus-visible:outline-none shadow-none"
+                  className="prose-journal ml-12 w-[calc(100%-3rem)] resize-none border-0 bg-transparent px-0 py-2 text-foreground/85 placeholder:italic placeholder:text-muted-foreground/35 focus:outline-none focus:ring-0"
+                  style={{ lineHeight: "2", caretColor: "var(--lamp)" }}
                 />
               )}
             </div>
@@ -174,22 +176,22 @@ function SurveysPage() {
         </div>
 
         {message && (
-          <p className="border-l-2 border-primary/40 pl-4 text-sm italic text-foreground/80 animate-fade-in">
+          <p className="text-center text-sm italic text-foreground/50 animate-fade-in">
             {message}
           </p>
         )}
 
-        <div className="flex items-center justify-between border-t border-border/40 pt-6">
+        <div className="flex items-center justify-between">
           <button
             onClick={() => setOpenId(null)}
-            className="smallcaps text-muted-foreground transition-colors hover:text-foreground"
+            className="smallcaps text-muted-foreground/40 transition-all duration-500 hover:text-foreground/70"
           >
             Not now
           </button>
           <button
             onClick={() => submit(openSurvey)}
             disabled={submitting}
-            className="smallcaps text-foreground transition-colors hover:text-lamp disabled:text-muted-foreground/40"
+            className="smallcaps text-foreground/70 transition-all duration-500 hover:text-lamp disabled:text-muted-foreground/25"
           >
             {submitting ? "Keeping…" : "Keep my answers"}
           </button>
@@ -199,16 +201,18 @@ function SurveysPage() {
   }
 
   return (
-    <div className="space-y-20">
-      <header className="animate-rise">
-        <p className="smallcaps text-muted-foreground">Reflections</p>
-        <h1 className="mt-5 font-display text-5xl italic text-ink">Five careful questions.</h1>
-        <p className="mt-4 max-w-xl italic text-muted-foreground">
+    <div className="space-y-24">
+      <header className="animate-rise text-center">
+        <p className="smallcaps text-muted-foreground/50">Reflections</p>
+        <h1 className="mt-6 font-display text-6xl italic text-ink leading-[1.1] sm:text-7xl">
+          Five careful<br />questions.
+        </h1>
+        <p className="mx-auto mt-6 max-w-md italic text-muted-foreground/50" style={{ lineHeight: "1.9" }}>
           Each one is a quiet way of asking how you really are.
         </p>
       </header>
 
-      <div className="space-y-2 animate-slow">
+      <div className="space-y-0 animate-slow">
         {surveys.map((s, i) => {
           const done = completed.has(s.id);
           const count = (questions[s.id] ?? []).length;
@@ -216,25 +220,23 @@ function SurveysPage() {
             <button
               key={s.id}
               onClick={() => open(s.id)}
-              className="group block w-full border-b border-border/40 py-8 text-left transition-colors hover:border-foreground/40"
+              className="group block w-full py-10 text-left transition-all duration-500"
             >
               <div className="flex items-baseline justify-between gap-6">
                 <div>
-                  <div className="flex items-baseline gap-4">
-                    <span className="smallcaps text-muted-foreground/70">{String(i + 1).padStart(2, "0")}</span>
-                    <p className="font-display text-3xl italic text-ink transition-colors group-hover:text-lamp">
+                  <div className="flex items-baseline gap-5">
+                    <span className="smallcaps text-muted-foreground/30">{String(i + 1).padStart(2, "0")}</span>
+                    <p className="font-display text-3xl italic text-ink/80 transition-all duration-500 group-hover:text-lamp sm:text-4xl">
                       {s.title}
                     </p>
                   </div>
                   {s.description && (
-                    <p className="mt-2 max-w-xl pl-12 text-sm italic text-muted-foreground">{s.description}</p>
+                    <p className="mt-3 max-w-xl pl-12 text-sm italic text-muted-foreground/40">{s.description}</p>
                   )}
                 </div>
-                <div className="text-right">
-                  <p className="smallcaps text-muted-foreground">
-                    {done ? "Kept" : `${count} questions`}
-                  </p>
-                </div>
+                <p className="smallcaps text-muted-foreground/30">
+                  {done ? "Kept" : `${count} questions`}
+                </p>
               </div>
             </button>
           );
