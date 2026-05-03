@@ -17,6 +17,7 @@ interface RecentMood {
 }
 interface Recommendation {
   message: string;
+  type: string;
   created_at: string;
 }
 
