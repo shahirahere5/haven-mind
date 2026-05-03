@@ -27,7 +27,7 @@ function DashboardHome() {
   const [stats, setStats] = useState({ entries: 0, moods: 0 });
   const [lastEntry, setLastEntry] = useState<RecentEntry | null>(null);
   const [lastMood, setLastMood] = useState<RecentMood | null>(null);
-  const [latestRec, setLatestRec] = useState<Recommendation | null>(null);
+  const [recs, setRecs] = useState<Recommendation[]>([]);
 
   useEffect(() => {
     if (!user) return;
