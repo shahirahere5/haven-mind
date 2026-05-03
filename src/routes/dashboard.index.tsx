@@ -7,10 +7,26 @@ export const Route = createFileRoute("/dashboard/")({
   component: DashboardHome,
 });
 
+interface RecentEntry {
+  text: string | null;
+  created_at: string;
+}
+interface RecentMood {
+  mood_level: number | null;
+  created_at: string;
+}
+interface Recommendation {
+  message: string;
+  created_at: string;
+}
+
 function DashboardHome() {
   const { user } = useAuth();
   const [name, setName] = useState<string>("");
   const [stats, setStats] = useState({ entries: 0, moods: 0 });
+  const [lastEntry, setLastEntry] = useState<RecentEntry | null>(null);
+  const [lastMood, setLastMood] = useState<RecentMood | null>(null);
+  const [latestRec, setLatestRec] = useState<Recommendation | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -20,11 +36,24 @@ function DashboardHome() {
       supabase.from("journal_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
       supabase.from("mood_logs").select("id", { count: "exact", head: true }).eq("user_id", user.id),
     ]).then(([j, m]) => setStats({ entries: j.count ?? 0, moods: m.count ?? 0 }));
+
+    // Recent activity
+    supabase.from("journal_entries").select("text, created_at").eq("user_id", user.id)
+      .order("created_at", { ascending: false }).limit(1).maybeSingle()
+      .then(({ data }) => setLastEntry(data));
+    supabase.from("mood_logs").select("mood_level, created_at").eq("user_id", user.id)
+      .order("created_at", { ascending: false }).limit(1).maybeSingle()
+      .then(({ data }) => setLastMood(data));
+    supabase.from("recommendations").select("message, created_at").eq("user_id", user.id)
+      .order("created_at", { ascending: false }).limit(1).maybeSingle()
+      .then(({ data }) => setLatestRec(data));
   }, [user]);
 
   const today = new Date().toLocaleDateString(undefined, {
     weekday: "long", month: "long", day: "numeric",
   });
+
+  const MOODS: Record<number, string> = { 1: "Low", 2: "Quiet", 3: "Balanced", 4: "Light", 5: "Clear" };
 
   const links: Array<{ to: string; label: string; sub: string }> = [
     { to: "/dashboard/journal", label: "Open the journal", sub: "Write what you couldn't say out loud." },
@@ -49,6 +78,54 @@ function DashboardHome() {
         <Stat label="Entries" value={stats.entries} />
         <Stat label="Moods" value={stats.moods} />
       </section>
+
+      {/* Latest recommendation */}
+      {latestRec && (
+        <>
+          <div className="rule" />
+          <section className="animate-slow text-center">
+            <p className="smallcaps text-muted-foreground/40 mb-6">A gentle note</p>
+            <p className="mx-auto max-w-lg font-display text-2xl italic text-ink/80" style={{ lineHeight: "1.7" }}>
+              "{latestRec.message}"
+            </p>
+            <p className="mt-4 text-xs italic text-muted-foreground/30">
+              {new Date(latestRec.created_at).toLocaleDateString(undefined, { month: "long", day: "numeric" })}
+            </p>
+          </section>
+        </>
+      )}
+
+      {/* Recent activity */}
+      {(lastEntry || lastMood) && (
+        <>
+          <div className="rule" />
+          <section className="animate-slow space-y-10">
+            <p className="smallcaps text-muted-foreground/40">Recent</p>
+            {lastEntry && (
+              <div>
+                <p className="text-xs smallcaps text-muted-foreground/30 mb-2">Last journal entry</p>
+                <p className="text-sm italic text-foreground/60" style={{ lineHeight: "1.8" }}>
+                  {(lastEntry.text ?? "").slice(0, 160)}{(lastEntry.text ?? "").length > 160 ? "…" : ""}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground/25">
+                  {new Date(lastEntry.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                </p>
+              </div>
+            )}
+            {lastMood && (
+              <div>
+                <p className="text-xs smallcaps text-muted-foreground/30 mb-2">Last mood</p>
+                <p className="font-display text-xl italic text-ink/70">
+                  {MOODS[lastMood.mood_level ?? 0] ?? "—"}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground/25">
+                  {new Date(lastMood.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                </p>
+              </div>
+            )}
+          </section>
+        </>
+      )}
 
       <div className="rule" />
 
