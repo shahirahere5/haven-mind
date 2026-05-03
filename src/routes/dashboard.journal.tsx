@@ -77,11 +77,33 @@ function JournalPage() {
     if (!text.trim() || !user) return;
     setSubmitting(true);
     setError(null);
-    const { error } = await supabase
+    const { data: inserted, error } = await supabase
       .from("journal_entries")
-      .insert({ user_id: user.id, text: text.trim(), emotion: emotion || null });
+      .insert({ user_id: user.id, text: text.trim(), emotion: emotion || null })
+      .select("sentiment_score")
+      .single();
     if (error) setError(error.message);
     else {
+      // Generate recommendation based on sentiment score
+      const score = inserted?.sentiment_score ?? 0;
+      let recMessage = "";
+      if (score <= -0.4) {
+        recMessage = "Your words carry weight today. Consider reaching out to someone you trust, or simply rest.";
+      } else if (score <= -0.1) {
+        recMessage = "There's a tenderness in what you wrote. A walk or a few minutes of stillness may help.";
+      } else if (score <= 0.1) {
+        recMessage = "You seem to be in a reflective space. That's a good place to be.";
+      } else if (score <= 0.4) {
+        recMessage = "There's warmth in your words. Hold onto what brought you here.";
+      } else {
+        recMessage = "Your writing radiates lightness today. Carry this feeling forward.";
+      }
+      await supabase.from("recommendations").insert({
+        user_id: user.id,
+        message: recMessage,
+        type: "journal-sentiment",
+      });
+
       setText(""); setEmotion("");
       setSuccess(true); setTimeout(() => setSuccess(false), 3000);
       await load();
