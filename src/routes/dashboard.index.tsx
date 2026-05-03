@@ -80,18 +80,22 @@ function DashboardHome() {
         <Stat label="Moods" value={stats.moods} />
       </section>
 
-      {/* Latest recommendation */}
-      {latestRec && (
+      {/* Recommendations */}
+      {recs.length > 0 && (
         <>
           <div className="rule" />
-          <section className="animate-slow text-center">
-            <p className="smallcaps text-muted-foreground/40 mb-6">A gentle note</p>
-            <p className="mx-auto max-w-lg font-display text-2xl italic text-ink/80" style={{ lineHeight: "1.7" }}>
-              "{latestRec.message}"
-            </p>
-            <p className="mt-4 text-xs italic text-muted-foreground/30">
-              {new Date(latestRec.created_at).toLocaleDateString(undefined, { month: "long", day: "numeric" })}
-            </p>
+          <section className="animate-slow space-y-10">
+            <p className="smallcaps text-muted-foreground/40 text-center mb-6">Gentle notes</p>
+            {recs.map((rec, i) => (
+              <div key={i} className="text-center">
+                <p className="mx-auto max-w-lg font-display text-2xl italic text-ink/80" style={{ lineHeight: "1.7" }}>
+                  "{rec.message}"
+                </p>
+                <p className="mt-3 text-xs italic text-muted-foreground/30">
+                  {rec.type === "journal-sentiment" ? "From your journal" : "From your mood"} · {new Date(rec.created_at).toLocaleDateString(undefined, { month: "long", day: "numeric" })}
+                </p>
+              </div>
+            ))}
           </section>
         </>
       )}
