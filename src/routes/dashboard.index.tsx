@@ -45,9 +45,9 @@ function DashboardHome() {
     supabase.from("mood_logs").select("mood_level, created_at").eq("user_id", user.id)
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
       .then(({ data }) => setLastMood(data));
-    supabase.from("recommendations").select("message, created_at").eq("user_id", user.id)
-      .order("created_at", { ascending: false }).limit(1).maybeSingle()
-      .then(({ data }) => setLatestRec(data));
+    supabase.from("recommendations").select("message, type, created_at").eq("user_id", user.id)
+      .order("created_at", { ascending: false }).limit(5)
+      .then(({ data }) => setRecs(data ?? []));
   }, [user]);
 
   const today = new Date().toLocaleDateString(undefined, {
