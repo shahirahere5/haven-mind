@@ -17,6 +17,7 @@ interface RecentMood {
 }
 interface Recommendation {
   message: string;
+  type: string;
   created_at: string;
 }
 
@@ -26,7 +27,7 @@ function DashboardHome() {
   const [stats, setStats] = useState({ entries: 0, moods: 0 });
   const [lastEntry, setLastEntry] = useState<RecentEntry | null>(null);
   const [lastMood, setLastMood] = useState<RecentMood | null>(null);
-  const [latestRec, setLatestRec] = useState<Recommendation | null>(null);
+  const [recs, setRecs] = useState<Recommendation[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -44,9 +45,9 @@ function DashboardHome() {
     supabase.from("mood_logs").select("mood_level, created_at").eq("user_id", user.id)
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
       .then(({ data }) => setLastMood(data));
-    supabase.from("recommendations").select("message, created_at").eq("user_id", user.id)
-      .order("created_at", { ascending: false }).limit(1).maybeSingle()
-      .then(({ data }) => setLatestRec(data));
+    supabase.from("recommendations").select("message, type, created_at").eq("user_id", user.id)
+      .order("created_at", { ascending: false }).limit(5)
+      .then(({ data }) => setRecs(data ?? []));
   }, [user]);
 
   const today = new Date().toLocaleDateString(undefined, {
@@ -79,18 +80,22 @@ function DashboardHome() {
         <Stat label="Moods" value={stats.moods} />
       </section>
 
-      {/* Latest recommendation */}
-      {latestRec && (
+      {/* Recommendations */}
+      {recs.length > 0 && (
         <>
           <div className="rule" />
-          <section className="animate-slow text-center">
-            <p className="smallcaps text-muted-foreground/40 mb-6">A gentle note</p>
-            <p className="mx-auto max-w-lg font-display text-2xl italic text-ink/80" style={{ lineHeight: "1.7" }}>
-              "{latestRec.message}"
-            </p>
-            <p className="mt-4 text-xs italic text-muted-foreground/30">
-              {new Date(latestRec.created_at).toLocaleDateString(undefined, { month: "long", day: "numeric" })}
-            </p>
+          <section className="animate-slow space-y-10">
+            <p className="smallcaps text-muted-foreground/40 text-center mb-6">Gentle notes</p>
+            {recs.map((rec, i) => (
+              <div key={i} className="text-center">
+                <p className="mx-auto max-w-lg font-display text-2xl italic text-ink/80" style={{ lineHeight: "1.7" }}>
+                  "{rec.message}"
+                </p>
+                <p className="mt-3 text-xs italic text-muted-foreground/30">
+                  {rec.type === "journal-sentiment" ? "From your journal" : "From your mood"} · {new Date(rec.created_at).toLocaleDateString(undefined, { month: "long", day: "numeric" })}
+                </p>
+              </div>
+            ))}
           </section>
         </>
       )}
