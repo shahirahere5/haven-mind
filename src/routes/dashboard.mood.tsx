@@ -61,6 +61,21 @@ function MoodPage() {
       .insert({ user_id: user.id, mood_level: mood, note: note.trim() || null });
     if (error) setError(error.message);
     else {
+      // Generate rule-based recommendation
+      let recMessage = "";
+      if (mood <= 2) {
+        recMessage = "Consider taking a short break or talking to someone you trust.";
+      } else if (mood === 3) {
+        recMessage = "Try doing something small that makes you feel better.";
+      } else {
+        recMessage = "You seem to be doing well. Keep maintaining your routine.";
+      }
+      await supabase.from("recommendations").insert({
+        user_id: user.id,
+        message: recMessage,
+        type: "rule-based",
+      });
+
       setMood(null); setNote("");
       setSuccess(true); setTimeout(() => setSuccess(false), 2800);
       await load();
