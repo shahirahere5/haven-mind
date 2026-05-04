@@ -40,37 +40,37 @@ function DashboardLayout() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-border/30">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-8 py-8">
-          <Link to="/dashboard" className="font-display text-2xl italic text-ink/80">
+      <header className="glass border-b border-glass-border/30 sticky top-0 z-50">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-8 py-5">
+          <Link to="/dashboard" className="font-display text-2xl gradient-text">
             MindHaven
           </Link>
           <div className="flex items-center gap-6">
-            <span className="hidden text-xs italic text-muted-foreground/50 sm:inline">
+            <span className="hidden text-sm text-muted-foreground/50 sm:inline">
               {name ? name : user?.email}
             </span>
             <button
               onClick={() => signOut()}
-              className="smallcaps text-muted-foreground/50 transition-all duration-500 hover:text-foreground"
+              className="smallcaps text-muted-foreground/50 transition-colors duration-300 hover:text-lamp"
             >
-              Leave quietly
+              Sign Out
             </button>
           </div>
         </div>
-        <nav className="mx-auto flex max-w-3xl gap-10 overflow-x-auto px-8 pb-6">
+        <nav className="mx-auto flex max-w-5xl gap-8 overflow-x-auto px-8 pb-4">
           {navItems.map((item) => (
             <Link
               key={item.to}
               to={item.to as "/dashboard"}
               activeOptions={{ exact: item.exact ?? false }}
-              className="smallcaps text-muted-foreground/40 transition-all duration-500 hover:text-foreground/80 data-[status=active]:text-foreground/90"
+              className="smallcaps text-muted-foreground/40 transition-all duration-300 hover:text-lamp data-[status=active]:text-lamp data-[status=active]:underline data-[status=active]:underline-offset-8 data-[status=active]:decoration-lamp/30"
             >
               {item.label}
             </Link>
           ))}
         </nav>
       </header>
-      <main className="mx-auto w-full max-w-3xl flex-1 px-8 py-20 animate-fade-in">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-8 py-16 animate-fade-in">
         <Outlet />
       </main>
       <Footer />

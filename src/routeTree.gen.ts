@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
@@ -18,6 +19,11 @@ import { Route as DashboardMoodRouteImport } from './routes/dashboard.mood'
 import { Route as DashboardJournalRouteImport } from './routes/dashboard.journal'
 import { Route as DashboardChatbotRouteImport } from './routes/dashboard.chatbot'
 
+const InsightsRoute = InsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/insights': typeof InsightsRoute
   '/dashboard/chatbot': typeof DashboardChatbotRoute
   '/dashboard/journal': typeof DashboardJournalRoute
   '/dashboard/mood': typeof DashboardMoodRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/insights': typeof InsightsRoute
   '/dashboard/chatbot': typeof DashboardChatbotRoute
   '/dashboard/journal': typeof DashboardJournalRoute
   '/dashboard/mood': typeof DashboardMoodRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/insights': typeof InsightsRoute
   '/dashboard/chatbot': typeof DashboardChatbotRoute
   '/dashboard/journal': typeof DashboardJournalRoute
   '/dashboard/mood': typeof DashboardMoodRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/insights'
     | '/dashboard/chatbot'
     | '/dashboard/journal'
     | '/dashboard/mood'
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/insights'
     | '/dashboard/chatbot'
     | '/dashboard/journal'
     | '/dashboard/mood'
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/insights'
     | '/dashboard/chatbot'
     | '/dashboard/journal'
     | '/dashboard/mood'
@@ -125,10 +137,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRouteWithChildren
+  InsightsRoute: typeof InsightsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/insights': {
+      id: '/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -212,6 +232,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRouteWithChildren,
+  InsightsRoute: InsightsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -13,7 +13,6 @@ interface Entry {
   text: string | null;
   emotion: string | null;
   created_at: string;
-  sentiment_score: number | null;
 }
 
 const EMOTIONS = [
@@ -27,21 +26,9 @@ const EMOTIONS = [
   { value: "hopeful", label: "Hopeful" },
 ];
 
-function sentimentLabel(score: number | null) {
-  if (score === null) return null;
-  if (score >= 0.4) return "Light";
-  if (score >= 0.1) return "Soft";
-  if (score > -0.1) return "Even";
-  if (score > -0.4) return "Tender";
-  return "Heavy";
-}
-
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
+    weekday: "long", day: "numeric", month: "long",
   });
 }
 
@@ -63,7 +50,7 @@ function JournalPage() {
     setLoading(true);
     const { data, error } = await supabase
       .from("journal_entries")
-      .select("id, text, emotion, created_at, sentiment_score")
+      .select("id, text, emotion, created_at")
       .order("created_at", { ascending: false });
     if (error) setError(error.message);
     else setEntries(data ?? []);
@@ -84,7 +71,6 @@ function JournalPage() {
       .single();
     if (error) setError(error.message);
     else {
-      // Generate recommendation based on sentiment score
       const score = inserted?.sentiment_score ?? 0;
       let recMessage = "";
       if (score <= -0.4) {
@@ -112,131 +98,112 @@ function JournalPage() {
   };
 
   return (
-    <div className="space-y-28">
-      {/* Header — editorial, quiet */}
-      <header className="animate-rise text-center">
-        <p className="smallcaps text-muted-foreground/60">The journal</p>
-        <h1 className="mt-6 font-display text-6xl italic text-ink leading-[1.1] sm:text-7xl">
-          A page kept<br />for you.
+    <div className="space-y-16">
+      <header className="animate-rise">
+        <p className="smallcaps text-lamp/60 mb-4">Journal</p>
+        <h1 className="font-display text-5xl text-ink sm:text-6xl leading-[1.1]">
+          Write freely
         </h1>
-        <p className="mx-auto mt-6 max-w-md text-base italic text-muted-foreground/70" style={{ lineHeight: "1.9" }}>
+        <p className="mt-4 text-muted-foreground/60" style={{ lineHeight: "1.8" }}>
           Your thoughts remain yours. No one else will see this.
         </p>
       </header>
 
-      {/* Writing canvas — no borders, no box, just text */}
-      <form onSubmit={submit} className="animate-slow">
+      <form onSubmit={submit} className="glass-card animate-slow">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Write what you couldn't say out loud…"
-          rows={16}
+          placeholder="What's on your mind today…"
+          rows={12}
           required
           maxLength={5000}
-          className="prose-journal w-full resize-none border-0 bg-transparent px-0 py-0 text-foreground/90 placeholder:italic placeholder:text-muted-foreground/40 focus:outline-none focus:ring-0"
+          className="w-full resize-none border-0 bg-transparent px-0 py-0 font-display text-lg text-foreground/90 placeholder:text-muted-foreground/30 focus:outline-none focus:ring-0"
           style={{
-            minHeight: "22rem",
+            minHeight: "16rem",
             caretColor: "var(--lamp)",
-            lineHeight: "2.1",
-            letterSpacing: "0.01em",
+            lineHeight: "2",
           }}
         />
 
-        <div className="mt-10 flex flex-wrap items-baseline gap-x-8 gap-y-3">
-          <p className="smallcaps text-muted-foreground/50">A word for it</p>
+        <div className="mt-8 flex flex-wrap items-center gap-3">
+          <p className="text-sm text-muted-foreground/40 mr-2">Feeling:</p>
           {EMOTIONS.map((em) => (
             <button
               key={em.value}
               type="button"
               onClick={() => setEmotion(emotion === em.value ? "" : em.value)}
-              className={`font-display text-base italic transition-all duration-500 ${
+              className={`rounded-full px-4 py-1.5 text-sm transition-all duration-300 ${
                 emotion === em.value
-                  ? "text-lamp underline decoration-lamp/30 underline-offset-4"
+                  ? "text-primary-foreground"
                   : "text-muted-foreground/60 hover:text-foreground/80"
               }`}
+              style={emotion === em.value ? { background: "var(--gradient-primary)" } : { background: "var(--glass)" }}
             >
               {em.label}
             </button>
           ))}
         </div>
 
-        <div className="mt-8 flex items-center justify-between">
-          <p className="text-xs italic text-muted-foreground/40">{text.length} / 5 000</p>
+        <div className="mt-6 flex items-center justify-between">
+          <p className="text-xs text-muted-foreground/30">{text.length} / 5,000</p>
           <button
             type="submit"
             disabled={submitting || !text.trim()}
-            className="smallcaps text-foreground/80 transition-all duration-500 hover:text-lamp disabled:cursor-not-allowed disabled:text-muted-foreground/30"
+            className="rounded-xl px-6 py-2.5 font-medium text-primary-foreground transition-all duration-300 disabled:opacity-30"
+            style={{ background: "var(--gradient-primary)" }}
           >
-            {submitting ? "Keeping…" : "Keep this"}
+            {submitting ? "Saving…" : "Save Entry"}
           </button>
         </div>
 
-        {error && <p className="mt-6 text-sm italic text-destructive/70 animate-fade-in">{error}</p>}
+        {error && <p className="mt-4 text-sm text-destructive/70 animate-fade-in">{error}</p>}
         {success && (
-          <p className="mt-6 text-sm italic text-foreground/60 animate-fade-in">
-            Kept. Thank you for trusting the page.
+          <p className="mt-4 text-sm text-teal/70 animate-fade-in">
+            Saved. Thank you for sharing with yourself.
           </p>
         )}
       </form>
 
-      {/* Divider */}
       <div className="rule" />
 
-      {/* Earlier entries — flowing text, not cards */}
-      <section className="space-y-6">
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-4xl italic text-ink">Earlier pages</h2>
-          <p className="smallcaps text-muted-foreground/50">{entries.length} kept</p>
+      <section className="space-y-4">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-display text-3xl text-ink">Previous Entries</h2>
+          <p className="text-sm text-muted-foreground/40">{entries.length} entries</p>
         </div>
 
         {loading ? (
           <InlineLoader />
         ) : entries.length === 0 ? (
-          <p className="py-16 text-center font-display text-lg italic text-muted-foreground/50">
-            Nothing yet. You may begin when ready.
-          </p>
+          <div className="glass-card text-center py-12">
+            <p className="font-display text-xl text-muted-foreground/40">
+              No entries yet. Start writing when you're ready.
+            </p>
+          </div>
         ) : (
-          <div className="space-y-20 mt-12">
-            {entries.map((entry, i) => {
-              const tone = sentimentLabel(entry.sentiment_score);
-              return (
-                <article
-                  key={entry.id}
-                  className="animate-rise"
-                  style={{ animationDelay: `${i * 80}ms` }}
-                >
-                  <div className="flex items-baseline justify-between mb-6">
-                    <p className="font-display text-lg italic text-foreground/50">
-                      {formatDate(entry.created_at)}
-                    </p>
-                    <p className="smallcaps text-muted-foreground/40">{formatTime(entry.created_at)}</p>
+          <div className="space-y-4">
+            {entries.map((entry, i) => (
+              <article
+                key={entry.id}
+                className="glass-card animate-rise"
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-sm text-muted-foreground/50">{formatDate(entry.created_at)}</p>
+                  <p className="text-xs text-muted-foreground/30">{formatTime(entry.created_at)}</p>
+                </div>
+                <p className="text-foreground/80 whitespace-pre-wrap" style={{ lineHeight: "1.8" }}>
+                  {entry.text}
+                </p>
+                {entry.emotion && (
+                  <div className="mt-4">
+                    <span className="rounded-full px-3 py-1 text-xs" style={{ background: "var(--glass)" }}>
+                      {EMOTIONS.find(e => e.value === entry.emotion)?.label ?? entry.emotion}
+                    </span>
                   </div>
-                  <p
-                    className="prose-journal whitespace-pre-wrap text-foreground/85"
-                    style={{ lineHeight: "2.1", letterSpacing: "0.01em" }}
-                  >
-                    {entry.text}
-                  </p>
-                  {(entry.emotion || tone) && (
-                    <div className="mt-8 flex items-center gap-8 text-xs italic text-muted-foreground/50">
-                      {entry.emotion && (
-                        <span>
-                          {EMOTIONS.find(e => e.value === entry.emotion)?.label ?? entry.emotion}
-                        </span>
-                      )}
-                      {tone && (
-                        <span>
-                          {tone}
-                          {entry.sentiment_score !== null && (
-                            <span className="ml-1 text-muted-foreground/30">({entry.sentiment_score.toFixed(2)})</span>
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </article>
-              );
-            })}
+                )}
+              </article>
+            ))}
           </div>
         )}
       </section>
