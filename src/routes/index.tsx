@@ -12,7 +12,7 @@ function Index() {
   const [loaderDone, setLoaderDone] = useState(false);
 
   if (loading || !loaderDone) {
-    return <PageLoader label="Welcome to MindHaven" minMs={8000} onFinish={() => setLoaderDone(true)} />;
+    return <PageLoader label="Welcome to MindHaven" minMs={4000} onFinish={() => setLoaderDone(true)} />;
   }
 
   return <Navigate to={session ? "/dashboard" : "/auth"} />;
