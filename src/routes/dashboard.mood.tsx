@@ -16,15 +16,18 @@ interface MoodLog {
 }
 
 const MOODS = [
-  { level: 1, label: "Low" },
-  { level: 2, label: "Quiet" },
-  { level: 3, label: "Balanced" },
-  { level: 4, label: "Light" },
-  { level: 5, label: "Clear" },
+  { level: 1, label: "Low", emoji: "😔" },
+  { level: 2, label: "Quiet", emoji: "😐" },
+  { level: 3, label: "Balanced", emoji: "🙂" },
+  { level: 4, label: "Light", emoji: "😊" },
+  { level: 5, label: "Clear", emoji: "✨" },
 ];
 
 function moodLabel(level: number | null) {
   return MOODS.find((m) => m.level === level)?.label ?? "—";
+}
+function moodEmoji(level: number | null) {
+  return MOODS.find((m) => m.level === level)?.emoji ?? "";
 }
 
 function MoodPage() {
@@ -61,7 +64,6 @@ function MoodPage() {
       .insert({ user_id: user.id, mood_level: mood, note: note.trim() || null });
     if (error) setError(error.message);
     else {
-      // Generate rule-based recommendation
       let recMessage = "";
       if (mood <= 2) {
         recMessage = "Consider taking a short break or talking to someone you trust.";
@@ -84,94 +86,102 @@ function MoodPage() {
   };
 
   return (
-    <div className="space-y-28">
-      <header className="animate-rise text-center">
-        <p className="smallcaps text-muted-foreground/50">A pause</p>
-        <h1 className="mt-6 font-display text-6xl italic text-ink leading-[1.1] sm:text-7xl">
-          How is the air<br />today?
+    <div className="space-y-16">
+      <header className="animate-rise">
+        <p className="smallcaps text-teal/60 mb-4">Mood Check-In</p>
+        <h1 className="font-display text-5xl text-ink sm:text-6xl leading-[1.1]">
+          How are you feeling?
         </h1>
-        <p className="mx-auto mt-6 max-w-md italic text-muted-foreground/60" style={{ lineHeight: "1.9" }}>
-          There is no wrong answer here. Only the one that is true.
+        <p className="mt-4 text-muted-foreground/60" style={{ lineHeight: "1.8" }}>
+          There's no wrong answer. Just be honest with yourself.
         </p>
       </header>
 
-      <form onSubmit={submit} className="space-y-14 animate-slow">
-        <div className="flex flex-wrap items-baseline justify-center gap-x-12 gap-y-5">
+      <form onSubmit={submit} className="glass-card animate-slow space-y-8">
+        <div className="flex flex-wrap items-center justify-center gap-4">
           {MOODS.map((m) => (
             <button
               key={m.level}
               type="button"
               onClick={() => setMood(m.level)}
-              className={`font-display text-3xl italic transition-all duration-500 ${
+              className={`flex flex-col items-center gap-2 rounded-2xl px-6 py-4 transition-all duration-300 ${
                 mood === m.level
-                  ? "text-lamp underline decoration-lamp/30 underline-offset-8"
-                  : "text-muted-foreground/50 hover:text-foreground/70"
+                  ? "shadow-glow"
+                  : "hover:bg-foreground/5"
               }`}
+              style={mood === m.level ? { background: "var(--gradient-primary)" } : { background: "var(--glass)" }}
             >
-              {m.label}
+              <span className="text-2xl">{m.emoji}</span>
+              <span className={`text-sm font-medium ${mood === m.level ? "text-primary-foreground" : "text-muted-foreground/60"}`}>
+                {m.label}
+              </span>
             </button>
           ))}
         </div>
 
         <div>
-          <p className="smallcaps text-center text-muted-foreground/40 mb-4">A note, if you wish</p>
+          <p className="text-sm text-muted-foreground/40 mb-3">Add a note (optional)</p>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="What is shaping the day?"
+            placeholder="What's shaping your day?"
             rows={3}
             maxLength={500}
-            className="prose-journal w-full resize-none border-0 bg-transparent px-0 py-2 text-foreground/85 placeholder:italic placeholder:text-muted-foreground/35 focus:outline-none focus:ring-0"
-            style={{ lineHeight: "2", caretColor: "var(--lamp)" }}
+            className="w-full resize-none rounded-xl border-0 px-4 py-3 text-foreground/85 placeholder:text-muted-foreground/30 focus:outline-none focus:ring-0"
+            style={{ background: "var(--glass)", caretColor: "var(--lamp)", lineHeight: "1.8" }}
           />
         </div>
 
         <div className="flex items-center justify-between">
-          <p className="text-xs italic text-muted-foreground/30">{note.length} / 500</p>
+          <p className="text-xs text-muted-foreground/30">{note.length} / 500</p>
           <button
             type="submit"
             disabled={submitting || mood === null}
-            className="smallcaps text-foreground/70 transition-all duration-500 hover:text-lamp disabled:cursor-not-allowed disabled:text-muted-foreground/25"
+            className="rounded-xl px-6 py-2.5 font-medium text-primary-foreground transition-all duration-300 disabled:opacity-30"
+            style={{ background: "var(--gradient-primary)" }}
           >
-            {submitting ? "Keeping…" : "Note this moment"}
+            {submitting ? "Saving…" : "Log Mood"}
           </button>
         </div>
 
-        {error && <p className="text-sm italic text-destructive/60 animate-fade-in">{error}</p>}
+        {error && <p className="text-sm text-destructive/70 animate-fade-in">{error}</p>}
         {success && (
-          <p className="text-center text-sm italic text-foreground/50 animate-fade-in">
-            Noted.
+          <p className="text-center text-sm text-teal/70 animate-fade-in">
+            Mood logged. Take care of yourself.
           </p>
         )}
       </form>
 
       <div className="rule" />
 
-      <section className="space-y-8">
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-4xl italic text-ink">Recent</h2>
-          <p className="smallcaps text-muted-foreground/40">{logs.length} noticed</p>
+      <section className="space-y-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-display text-3xl text-ink">Recent Moods</h2>
+          <p className="text-sm text-muted-foreground/40">{logs.length} logged</p>
         </div>
 
         {loading ? (
           <InlineLoader />
         ) : logs.length === 0 ? (
-          <p className="py-16 text-center font-display text-lg italic text-muted-foreground/40">
-            Nothing yet. Begin when you wish.
-          </p>
+          <div className="glass-card text-center py-12">
+            <p className="font-display text-xl text-muted-foreground/40">
+              No mood logs yet. Start when you're ready.
+            </p>
+          </div>
         ) : (
-          <div className="space-y-0 mt-8">
+          <div className="space-y-3">
             {logs.map((log, i) => (
               <div
                 key={log.id}
-                className="flex items-baseline justify-between py-6 animate-fade-in"
-                style={{ animationDelay: `${i * 40}ms` }}
+                className="glass-card flex items-center gap-4 animate-fade-in"
+                style={{ animationDelay: `${i * 30}ms`, padding: "1rem 1.5rem" }}
               >
-                <p className="font-display text-xl italic text-ink/80 w-28">{moodLabel(log.mood_level)}</p>
-                <p className="flex-1 text-sm italic text-foreground/50 px-6">
-                  {log.note ?? <span className="text-muted-foreground/25">—</span>}
+                <span className="text-xl">{moodEmoji(log.mood_level)}</span>
+                <p className="font-display text-lg text-ink/80 w-24">{moodLabel(log.mood_level)}</p>
+                <p className="flex-1 text-sm text-foreground/50 truncate">
+                  {log.note ?? "—"}
                 </p>
-                <p className="smallcaps text-muted-foreground/35">
+                <p className="text-xs text-muted-foreground/30 whitespace-nowrap">
                   {new Date(log.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                 </p>
               </div>
