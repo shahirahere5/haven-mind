@@ -12,6 +12,7 @@ interface Entry {
   id: string;
   text: string | null;
   emotion: string | null;
+  sentiment_label: string | null;
   created_at: string;
 }
 
@@ -50,7 +51,7 @@ function JournalPage() {
     setLoading(true);
     const { data, error } = await supabase
       .from("journal_entries")
-      .select("id, text, emotion, created_at")
+      .select("id, text, emotion, sentiment_label, created_at")
       .order("created_at", { ascending: false });
     if (error) setError(error.message);
     else setEntries(data ?? []);
@@ -64,36 +65,75 @@ function JournalPage() {
     if (!text.trim() || !user) return;
     setSubmitting(true);
     setError(null);
-    const { data: inserted, error } = await supabase
+
+    const trimmedText = text.trim();
+
+    // 1. Insert journal entry
+    const { data: inserted, error: insertErr } = await supabase
       .from("journal_entries")
-      .insert({ user_id: user.id, text: text.trim(), emotion: emotion || null })
-      .select("sentiment_score")
+      .insert({ user_id: user.id, text: trimmedText, emotion: emotion || null })
+      .select("id, sentiment_score")
       .single();
-    if (error) setError(error.message);
-    else {
-      const score = inserted?.sentiment_score ?? 0;
-      let recMessage = "";
-      if (score <= -0.4) {
-        recMessage = "Your words carry weight today. Consider reaching out to someone you trust, or simply rest.";
-      } else if (score <= -0.1) {
-        recMessage = "There's a tenderness in what you wrote. A walk or a few minutes of stillness may help.";
-      } else if (score <= 0.1) {
-        recMessage = "You seem to be in a reflective space. That's a good place to be.";
-      } else if (score <= 0.4) {
-        recMessage = "There's warmth in your words. Hold onto what brought you here.";
-      } else {
-        recMessage = "Your writing radiates lightness today. Carry this feeling forward.";
-      }
-      await supabase.from("recommendations").insert({
-        user_id: user.id,
-        message: recMessage,
-        type: "journal-sentiment",
+
+    if (insertErr) {
+      setError(insertErr.message);
+      setSubmitting(false);
+      return;
+    }
+
+    // 2. Call AI analysis (non-blocking for UX — entry is already saved)
+    try {
+      const aiRes = await supabase.functions.invoke("analyze-journal", {
+        body: { text: trimmedText },
       });
 
-      setText(""); setEmotion("");
-      setSuccess(true); setTimeout(() => setSuccess(false), 3000);
-      await load();
+      if (aiRes.data && !aiRes.error) {
+        const { sentiment, emotion: aiEmotion } = aiRes.data as {
+          sentiment: string;
+          emotion: string;
+        };
+
+        // Update journal entry with AI results
+        await supabase
+          .from("journal_entries")
+          .update({
+            sentiment_label: sentiment,
+            emotion: aiEmotion,
+          })
+          .eq("id", inserted.id);
+
+        // Generate recommendation based on AI sentiment
+        const recMessages: Record<string, string> = {
+          negative: "Your words carry weight today. Consider reaching out to someone you trust, or simply rest.",
+          neutral: "You seem to be in a reflective space. That's a good place to be.",
+          positive: "Your writing radiates lightness today. Carry this feeling forward.",
+        };
+
+        await supabase.from("recommendations").insert({
+          user_id: user.id,
+          message: recMessages[sentiment] ?? recMessages.neutral,
+          type: "journal-sentiment",
+        });
+      }
+    } catch (aiErr) {
+      console.error("AI analysis failed (entry still saved):", aiErr);
+      // Fallback: use DB sentiment score for recommendation
+      const score = inserted?.sentiment_score ?? 0;
+      const fallbackMsg = score <= -0.1
+        ? "Your words carry weight today. Consider reaching out to someone you trust, or simply rest."
+        : score >= 0.1
+          ? "Your writing radiates lightness today. Carry this feeling forward."
+          : "You seem to be in a reflective space. That's a good place to be.";
+      await supabase.from("recommendations").insert({
+        user_id: user.id,
+        message: fallbackMsg,
+        type: "journal-sentiment",
+      });
     }
+
+    setText(""); setEmotion("");
+    setSuccess(true); setTimeout(() => setSuccess(false), 3000);
+    await load();
     setSubmitting(false);
   };
 
@@ -196,10 +236,19 @@ function JournalPage() {
                   {entry.text}
                 </p>
                 {entry.emotion && (
-                  <div className="mt-4">
-                    <span className="rounded-full px-3 py-1 text-xs" style={{ background: "var(--glass)" }}>
-                      {EMOTIONS.find(e => e.value === entry.emotion)?.label ?? entry.emotion}
+                  <div className="mt-4 flex items-center gap-2">
+                    <span className="rounded-full px-3 py-1 text-xs capitalize" style={{ background: "var(--glass)" }}>
+                      Emotion: {entry.emotion}
                     </span>
+                    {entry.sentiment_label && (
+                      <span className="rounded-full px-3 py-1 text-xs capitalize" style={{
+                        background: entry.sentiment_label === "positive" ? "oklch(0.45 0.12 155 / 0.3)"
+                          : entry.sentiment_label === "negative" ? "oklch(0.45 0.12 15 / 0.3)"
+                          : "var(--glass)"
+                      }}>
+                        {entry.sentiment_label}
+                      </span>
+                    )}
                   </div>
                 )}
               </article>

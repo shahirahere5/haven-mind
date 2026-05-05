@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           emotion: string | null
           id: string
+          sentiment_label: string | null
           sentiment_score: number | null
           text: string | null
           user_id: string | null
@@ -27,6 +28,7 @@ export type Database = {
           created_at?: string
           emotion?: string | null
           id?: string
+          sentiment_label?: string | null
           sentiment_score?: number | null
           text?: string | null
           user_id?: string | null
@@ -35,6 +37,7 @@ export type Database = {
           created_at?: string
           emotion?: string | null
           id?: string
+          sentiment_label?: string | null
           sentiment_score?: number | null
           text?: string | null
           user_id?: string | null
