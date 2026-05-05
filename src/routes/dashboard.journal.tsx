@@ -236,20 +236,9 @@ function JournalPage() {
                   {entry.text}
                 </p>
                 {entry.emotion && (
-                  <div className="mt-4 flex items-center gap-2">
-                    <span className="rounded-full px-3 py-1 text-xs capitalize" style={{ background: "var(--glass)" }}>
-                      Emotion: {entry.emotion}
-                    </span>
-                    {entry.sentiment_label && (
-                      <span className="rounded-full px-3 py-1 text-xs capitalize" style={{
-                        background: entry.sentiment_label === "positive" ? "oklch(0.45 0.12 155 / 0.3)"
-                          : entry.sentiment_label === "negative" ? "oklch(0.45 0.12 15 / 0.3)"
-                          : "var(--glass)"
-                      }}>
-                        {entry.sentiment_label}
-                      </span>
-                    )}
-                  </div>
+                  <p className="mt-4 text-sm text-muted-foreground/50 italic">
+                    You seem a bit {entry.emotion}
+                  </p>
                 )}
               </article>
             ))}
