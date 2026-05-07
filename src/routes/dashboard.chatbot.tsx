@@ -1,10 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send } from "lucide-react";
 import { toast } from "sonner";
+import companionAvatar from "@/assets/companion-avatar.png";
 
 export const Route = createFileRoute("/dashboard/chatbot")({
   component: ChatbotPage,
@@ -25,7 +23,7 @@ function ChatbotPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -46,9 +44,6 @@ function ChatbotPage() {
       assistantSoFar += chunk;
       setMessages((prev) => {
         const last = prev[prev.length - 1];
-        if (last?.role === "assistant" && prev.length > 1 && last.content === assistantSoFar.slice(0, -chunk.length)) {
-          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
-        }
         if (last?.role === "assistant" && prev.length > 1) {
           return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
         }
@@ -105,7 +100,6 @@ function ChatbotPage() {
       }
     } catch (e: any) {
       toast.error(e.message || "Something went wrong");
-      // Remove the empty assistant message if any
       setMessages((prev) => {
         const last = prev[prev.length - 1];
         if (last?.role === "assistant" && !last.content) return prev.slice(0, -1);
@@ -124,76 +118,138 @@ function ChatbotPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-220px)] max-w-2xl mx-auto animate-rise">
-      {/* Header */}
-      <div className="text-center mb-6">
-        <div className="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-3" style={{ background: "var(--glass)" }}>
-          💛
+    <div className="flex flex-col animate-rise" style={{ height: "calc(100vh - 180px)", minHeight: "500px" }}>
+      {/* Compact header */}
+      <div className="flex items-center gap-3 pb-5 mb-2 border-b border-glass-border/20">
+        <div className="relative">
+          <img
+            src={companionAvatar}
+            alt="MindHaven Companion"
+            width={48}
+            height={48}
+            className="rounded-full"
+            style={{ background: "var(--companion-avatar-bg, oklch(0.92 0.02 85))" }}
+          />
+          <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2"
+            style={{ background: "oklch(0.72 0.15 155)", borderColor: "var(--background)" }} />
         </div>
-        <p className="smallcaps text-teal/60 mb-1">AI Companion</p>
-        <h1 className="font-display text-3xl gradient-text">MindHaven Companion</h1>
-        <p className="text-xs text-muted-foreground/40 mt-2">
-          I'm here to listen — not a therapist or medical professional.
-        </p>
+        <div>
+          <h1 className="font-display text-xl" style={{ color: "var(--ink, var(--foreground))" }}>
+            MindHaven Companion
+          </h1>
+          <p className="text-xs" style={{ color: "oklch(0.72 0.15 155)" }}>
+            Online · Here to listen
+          </p>
+        </div>
+        <div className="ml-auto">
+          <span className="text-[10px] px-2.5 py-1 rounded-full font-medium"
+            style={{ background: "oklch(0.72 0.15 155 / 0.15)", color: "oklch(0.72 0.15 155)" }}>
+            AI Companion
+          </span>
+        </div>
       </div>
 
-      {/* Messages */}
+      {/* Messages area - takes all available space */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4"
+        className="flex-1 overflow-y-auto py-4 space-y-5"
         style={{ scrollbarWidth: "thin" }}
       >
         {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
+          <div key={i} className={`flex gap-2.5 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
+            {/* Avatar for bot */}
+            {msg.role === "assistant" && (
+              <img
+                src={companionAvatar}
+                alt=""
+                width={32}
+                height={32}
+                className="rounded-full shrink-0 mt-1"
+                style={{ background: "oklch(0.92 0.02 85)" }}
+              />
+            )}
+
             <div
-              className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                msg.role === "user"
-                  ? "bg-primary/20 text-foreground rounded-br-md"
-                  : "glass border border-glass-border/20 text-foreground/80 rounded-bl-md"
+              className={`max-w-[75%] px-4 py-3 text-sm leading-relaxed ${
+                msg.role === "user" ? "rounded-2xl rounded-tr-md" : "rounded-2xl rounded-tl-md"
               }`}
+              style={
+                msg.role === "user"
+                  ? {
+                      background: "oklch(0.72 0.15 155 / 0.2)",
+                      color: "var(--foreground)",
+                    }
+                  : {
+                      background: "oklch(0.92 0.02 85 / 0.1)",
+                      border: "1px solid oklch(0.92 0.02 85 / 0.15)",
+                      color: "var(--foreground)",
+                    }
+              }
             >
               {msg.content}
               {msg.role === "assistant" && isLoading && i === messages.length - 1 && (
-                <span className="inline-block w-1.5 h-4 bg-teal/50 rounded-full ml-1 animate-pulse" />
+                <span className="inline-block w-1.5 h-4 rounded-full ml-1 animate-pulse"
+                  style={{ background: "oklch(0.72 0.15 155 / 0.5)" }} />
               )}
             </div>
+
+            {/* Spacer for user (no avatar) */}
+            {msg.role === "user" && <div className="w-8 shrink-0" />}
           </div>
         ))}
+
+        {/* Typing indicator */}
         {isLoading && messages[messages.length - 1]?.role === "user" && (
-          <div className="flex justify-start">
-            <div className="glass border border-glass-border/20 rounded-2xl rounded-bl-md px-4 py-3">
-              <div className="flex gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-teal/40 animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-2 h-2 rounded-full bg-teal/40 animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="w-2 h-2 rounded-full bg-teal/40 animate-bounce" style={{ animationDelay: "300ms" }} />
+          <div className="flex gap-2.5">
+            <img
+              src={companionAvatar}
+              alt=""
+              width={32}
+              height={32}
+              className="rounded-full shrink-0 mt-1"
+              style={{ background: "oklch(0.92 0.02 85)" }}
+            />
+            <div className="rounded-2xl rounded-tl-md px-4 py-3"
+              style={{ background: "oklch(0.92 0.02 85 / 0.1)", border: "1px solid oklch(0.92 0.02 85 / 0.15)" }}>
+              <div className="flex gap-1.5 items-center h-5">
+                <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: "oklch(0.72 0.15 155 / 0.6)", animationDelay: "0ms" }} />
+                <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: "oklch(0.72 0.15 155 / 0.6)", animationDelay: "150ms" }} />
+                <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: "oklch(0.72 0.15 155 / 0.6)", animationDelay: "300ms" }} />
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Input */}
-      <div className="glass border border-glass-border/30 rounded-2xl p-3 flex gap-3 items-end">
-        <Textarea
-          ref={textareaRef}
+      {/* Disclaimer */}
+      <p className="text-center text-[10px] text-muted-foreground/30 py-2">
+        Not a therapist or medical professional · For support, reach out to a licensed professional
+      </p>
+
+      {/* Input bar */}
+      <div className="rounded-2xl p-2 flex gap-2 items-end"
+        style={{ background: "oklch(0.92 0.02 85 / 0.08)", border: "1px solid oklch(0.92 0.02 85 / 0.12)" }}>
+        <textarea
+          ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Share what's on your mind…"
-          className="min-h-[44px] max-h-[120px] resize-none border-0 bg-transparent focus-visible:ring-0 text-sm placeholder:text-muted-foreground/30"
           rows={1}
+          className="flex-1 min-h-[42px] max-h-[120px] resize-none bg-transparent px-3 py-2.5 text-sm placeholder:text-muted-foreground/30 focus:outline-none"
+          style={{ color: "var(--foreground)" }}
         />
-        <Button
+        <button
           onClick={send}
           disabled={!input.trim() || isLoading}
-          size="icon"
-          className="shrink-0 rounded-xl bg-primary/80 hover:bg-primary h-10 w-10"
+          className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 disabled:opacity-30"
+          style={{
+            background: input.trim() && !isLoading ? "oklch(0.72 0.15 155)" : "oklch(0.72 0.15 155 / 0.3)",
+            color: "white",
+          }}
         >
           <Send className="h-4 w-4" />
-        </Button>
+        </button>
       </div>
     </div>
   );
