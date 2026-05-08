@@ -2,6 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
 import { Send } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/auth";
+import {
+  getChatbotMemory,
+  updateChatbotMemory,
+  loadUserContext,
+  buildSystemPrompt,
+} from "@/lib/chatbotMemory";
 import companionAvatar from "@/assets/companion-avatar.png";
 
 export const Route = createFileRoute("/dashboard/chatbot")({
@@ -19,11 +26,42 @@ const GREETING: Msg = {
 };
 
 function ChatbotPage() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Msg[]>([GREETING]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [memoryLoaded, setMemoryLoaded] = useState(false);
+  const [systemPrompt, setSystemPrompt] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Load user context and memory on mount
+  useEffect(() => {
+    if (!user) return;
+
+    (async () => {
+      try {
+        const userContext = await loadUserContext(user.id);
+        const prompt = buildSystemPrompt(userContext);
+        setSystemPrompt(prompt);
+        
+        // Load previous conversation history
+        const memory = await getChatbotMemory(user.id);
+        if (memory.conversation_history.length > 0) {
+          // Show last 5 messages from history
+          const recentMessages = memory.conversation_history.slice(-10).map((m) => ({
+            role: m.role as "user" | "assistant",
+            content: m.content,
+          }));
+          setMessages([GREETING, ...recentMessages]);
+        }
+        setMemoryLoaded(true);
+      } catch (error) {
+        console.error("[v0] Error loading memory:", error);
+        setMemoryLoaded(true);
+      }
+    })();
+  }, [user]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -31,12 +69,21 @@ function ChatbotPage() {
 
   const send = async () => {
     const text = input.trim();
-    if (!text || isLoading) return;
+    if (!text || isLoading || !memoryLoaded) return;
 
     const userMsg: Msg = { role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
+
+    // Save user message to memory
+    if (user) {
+      await updateChatbotMemory(user.id, {
+        role: "user",
+        content: text,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     let assistantSoFar = "";
 
@@ -52,7 +99,11 @@ function ChatbotPage() {
     };
 
     try {
-      const allMsgs = [...messages.filter((m) => m !== GREETING), userMsg];
+      const allMsgs = [
+        ...(systemPrompt ? [{ role: "system" as const, content: systemPrompt }] : []),
+        ...messages.filter((m) => m !== GREETING).slice(-20),
+        userMsg,
+      ];
 
       const resp = await fetch(CHAT_URL, {
         method: "POST",
@@ -97,6 +148,15 @@ function ChatbotPage() {
             break;
           }
         }
+      }
+
+      // Save assistant response to memory
+      if (user && assistantSoFar) {
+        await updateChatbotMemory(user.id, {
+          role: "assistant",
+          content: assistantSoFar,
+          timestamp: new Date().toISOString(),
+        });
       }
     } catch (e: any) {
       toast.error(e.message || "Something went wrong");

@@ -14,10 +14,14 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as DashboardSurveysRouteImport } from './routes/dashboard.surveys'
 import { Route as DashboardMoodRouteImport } from './routes/dashboard.mood'
 import { Route as DashboardJournalRouteImport } from './routes/dashboard.journal'
 import { Route as DashboardChatbotRouteImport } from './routes/dashboard.chatbot'
+import { Route as Admin_layoutRouteImport } from './routes/admin/__layout'
+import { Route as AdminSurveysIndexRouteImport } from './routes/admin/surveys/index'
+import { Route as AdminSurveysCreateRouteImport } from './routes/admin/surveys/create'
 
 const InsightsRoute = InsightsRouteImport.update({
   id: '/insights',
@@ -44,6 +48,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardSurveysRoute = DashboardSurveysRouteImport.update({
   id: '/surveys',
   path: '/surveys',
@@ -64,27 +73,49 @@ const DashboardChatbotRoute = DashboardChatbotRouteImport.update({
   path: '/chatbot',
   getParentRoute: () => DashboardRoute,
 } as any)
+const Admin_layoutRoute = Admin_layoutRouteImport.update({
+  id: '/admin/__layout',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSurveysIndexRoute = AdminSurveysIndexRouteImport.update({
+  id: '/admin/surveys/',
+  path: '/admin/surveys/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSurveysCreateRoute = AdminSurveysCreateRouteImport.update({
+  id: '/admin/surveys/create',
+  path: '/admin/surveys/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/insights': typeof InsightsRoute
+  '/admin': typeof Admin_layoutRoute
   '/dashboard/chatbot': typeof DashboardChatbotRoute
   '/dashboard/journal': typeof DashboardJournalRoute
   '/dashboard/mood': typeof DashboardMoodRoute
   '/dashboard/surveys': typeof DashboardSurveysRoute
+  '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/admin/surveys/create': typeof AdminSurveysCreateRoute
+  '/admin/surveys/': typeof AdminSurveysIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/insights': typeof InsightsRoute
+  '/admin': typeof AdminIndexRoute
   '/dashboard/chatbot': typeof DashboardChatbotRoute
   '/dashboard/journal': typeof DashboardJournalRoute
   '/dashboard/mood': typeof DashboardMoodRoute
   '/dashboard/surveys': typeof DashboardSurveysRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/admin/surveys/create': typeof AdminSurveysCreateRoute
+  '/admin/surveys': typeof AdminSurveysIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -92,11 +123,15 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/insights': typeof InsightsRoute
+  '/admin/__layout': typeof Admin_layoutRoute
   '/dashboard/chatbot': typeof DashboardChatbotRoute
   '/dashboard/journal': typeof DashboardJournalRoute
   '/dashboard/mood': typeof DashboardMoodRoute
   '/dashboard/surveys': typeof DashboardSurveysRoute
+  '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/admin/surveys/create': typeof AdminSurveysCreateRoute
+  '/admin/surveys/': typeof AdminSurveysIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -105,32 +140,43 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/insights'
+    | '/admin'
     | '/dashboard/chatbot'
     | '/dashboard/journal'
     | '/dashboard/mood'
     | '/dashboard/surveys'
+    | '/admin/'
     | '/dashboard/'
+    | '/admin/surveys/create'
+    | '/admin/surveys/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/insights'
+    | '/admin'
     | '/dashboard/chatbot'
     | '/dashboard/journal'
     | '/dashboard/mood'
     | '/dashboard/surveys'
     | '/dashboard'
+    | '/admin/surveys/create'
+    | '/admin/surveys'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/dashboard'
     | '/insights'
+    | '/admin/__layout'
     | '/dashboard/chatbot'
     | '/dashboard/journal'
     | '/dashboard/mood'
     | '/dashboard/surveys'
+    | '/admin/'
     | '/dashboard/'
+    | '/admin/surveys/create'
+    | '/admin/surveys/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -138,6 +184,10 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   InsightsRoute: typeof InsightsRoute
+  Admin_layoutRoute: typeof Admin_layoutRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminSurveysCreateRoute: typeof AdminSurveysCreateRoute
+  AdminSurveysIndexRoute: typeof AdminSurveysIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -177,6 +227,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/surveys': {
       id: '/dashboard/surveys'
       path: '/surveys'
@@ -204,6 +261,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/chatbot'
       preLoaderRoute: typeof DashboardChatbotRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/admin/__layout': {
+      id: '/admin/__layout'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof Admin_layoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/surveys/': {
+      id: '/admin/surveys/'
+      path: '/admin/surveys'
+      fullPath: '/admin/surveys/'
+      preLoaderRoute: typeof AdminSurveysIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/surveys/create': {
+      id: '/admin/surveys/create'
+      path: '/admin/surveys/create'
+      fullPath: '/admin/surveys/create'
+      preLoaderRoute: typeof AdminSurveysCreateRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -233,7 +311,20 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRouteWithChildren,
   InsightsRoute: InsightsRoute,
+  Admin_layoutRoute: Admin_layoutRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminSurveysCreateRoute: AdminSurveysCreateRoute,
+  AdminSurveysIndexRoute: AdminSurveysIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
