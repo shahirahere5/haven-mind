@@ -21,7 +21,12 @@ import { Route as DashboardJournalRouteImport } from './routes/dashboard.journal
 import { Route as DashboardChatbotRouteImport } from './routes/dashboard.chatbot'
 import { Route as Admin_layoutRouteImport } from './routes/admin/__layout'
 import { Route as AdminSurveysIndexRouteImport } from './routes/admin/surveys/index'
+import { Route as AdminInsightsIndexRouteImport } from './routes/admin/insights/index'
 import { Route as AdminSurveysCreateRouteImport } from './routes/admin/surveys/create'
+import { Route as AdminInsightsCreateRouteImport } from './routes/admin/insights/create'
+import { Route as AdminSurveysSurveyIdScoringRouteImport } from './routes/admin/surveys/$surveyId/scoring'
+import { Route as AdminSurveysSurveyIdEditRouteImport } from './routes/admin/surveys/$surveyId/edit'
+import { Route as AdminInsightsInsightIdEditRouteImport } from './routes/admin/insights/$insightId/edit'
 
 const InsightsRoute = InsightsRouteImport.update({
   id: '/insights',
@@ -83,11 +88,39 @@ const AdminSurveysIndexRoute = AdminSurveysIndexRouteImport.update({
   path: '/admin/surveys/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminInsightsIndexRoute = AdminInsightsIndexRouteImport.update({
+  id: '/admin/insights/',
+  path: '/admin/insights/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminSurveysCreateRoute = AdminSurveysCreateRouteImport.update({
   id: '/admin/surveys/create',
   path: '/admin/surveys/create',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminInsightsCreateRoute = AdminInsightsCreateRouteImport.update({
+  id: '/admin/insights/create',
+  path: '/admin/insights/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSurveysSurveyIdScoringRoute =
+  AdminSurveysSurveyIdScoringRouteImport.update({
+    id: '/admin/surveys/$surveyId/scoring',
+    path: '/admin/surveys/$surveyId/scoring',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AdminSurveysSurveyIdEditRoute =
+  AdminSurveysSurveyIdEditRouteImport.update({
+    id: '/admin/surveys/$surveyId/edit',
+    path: '/admin/surveys/$surveyId/edit',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AdminInsightsInsightIdEditRoute =
+  AdminInsightsInsightIdEditRouteImport.update({
+    id: '/admin/insights/$insightId/edit',
+    path: '/admin/insights/$insightId/edit',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -101,8 +134,13 @@ export interface FileRoutesByFullPath {
   '/dashboard/surveys': typeof DashboardSurveysRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/admin/insights/create': typeof AdminInsightsCreateRoute
   '/admin/surveys/create': typeof AdminSurveysCreateRoute
+  '/admin/insights/': typeof AdminInsightsIndexRoute
   '/admin/surveys/': typeof AdminSurveysIndexRoute
+  '/admin/insights/$insightId/edit': typeof AdminInsightsInsightIdEditRoute
+  '/admin/surveys/$surveyId/edit': typeof AdminSurveysSurveyIdEditRoute
+  '/admin/surveys/$surveyId/scoring': typeof AdminSurveysSurveyIdScoringRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -114,8 +152,13 @@ export interface FileRoutesByTo {
   '/dashboard/mood': typeof DashboardMoodRoute
   '/dashboard/surveys': typeof DashboardSurveysRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/admin/insights/create': typeof AdminInsightsCreateRoute
   '/admin/surveys/create': typeof AdminSurveysCreateRoute
+  '/admin/insights': typeof AdminInsightsIndexRoute
   '/admin/surveys': typeof AdminSurveysIndexRoute
+  '/admin/insights/$insightId/edit': typeof AdminInsightsInsightIdEditRoute
+  '/admin/surveys/$surveyId/edit': typeof AdminSurveysSurveyIdEditRoute
+  '/admin/surveys/$surveyId/scoring': typeof AdminSurveysSurveyIdScoringRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -130,8 +173,13 @@ export interface FileRoutesById {
   '/dashboard/surveys': typeof DashboardSurveysRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/admin/insights/create': typeof AdminInsightsCreateRoute
   '/admin/surveys/create': typeof AdminSurveysCreateRoute
+  '/admin/insights/': typeof AdminInsightsIndexRoute
   '/admin/surveys/': typeof AdminSurveysIndexRoute
+  '/admin/insights/$insightId/edit': typeof AdminInsightsInsightIdEditRoute
+  '/admin/surveys/$surveyId/edit': typeof AdminSurveysSurveyIdEditRoute
+  '/admin/surveys/$surveyId/scoring': typeof AdminSurveysSurveyIdScoringRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -147,8 +195,13 @@ export interface FileRouteTypes {
     | '/dashboard/surveys'
     | '/admin/'
     | '/dashboard/'
+    | '/admin/insights/create'
     | '/admin/surveys/create'
+    | '/admin/insights/'
     | '/admin/surveys/'
+    | '/admin/insights/$insightId/edit'
+    | '/admin/surveys/$surveyId/edit'
+    | '/admin/surveys/$surveyId/scoring'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -160,8 +213,13 @@ export interface FileRouteTypes {
     | '/dashboard/mood'
     | '/dashboard/surveys'
     | '/dashboard'
+    | '/admin/insights/create'
     | '/admin/surveys/create'
+    | '/admin/insights'
     | '/admin/surveys'
+    | '/admin/insights/$insightId/edit'
+    | '/admin/surveys/$surveyId/edit'
+    | '/admin/surveys/$surveyId/scoring'
   id:
     | '__root__'
     | '/'
@@ -175,8 +233,13 @@ export interface FileRouteTypes {
     | '/dashboard/surveys'
     | '/admin/'
     | '/dashboard/'
+    | '/admin/insights/create'
     | '/admin/surveys/create'
+    | '/admin/insights/'
     | '/admin/surveys/'
+    | '/admin/insights/$insightId/edit'
+    | '/admin/surveys/$surveyId/edit'
+    | '/admin/surveys/$surveyId/scoring'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -186,8 +249,13 @@ export interface RootRouteChildren {
   InsightsRoute: typeof InsightsRoute
   Admin_layoutRoute: typeof Admin_layoutRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminInsightsCreateRoute: typeof AdminInsightsCreateRoute
   AdminSurveysCreateRoute: typeof AdminSurveysCreateRoute
+  AdminInsightsIndexRoute: typeof AdminInsightsIndexRoute
   AdminSurveysIndexRoute: typeof AdminSurveysIndexRoute
+  AdminInsightsInsightIdEditRoute: typeof AdminInsightsInsightIdEditRoute
+  AdminSurveysSurveyIdEditRoute: typeof AdminSurveysSurveyIdEditRoute
+  AdminSurveysSurveyIdScoringRoute: typeof AdminSurveysSurveyIdScoringRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -276,11 +344,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSurveysIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/insights/': {
+      id: '/admin/insights/'
+      path: '/admin/insights'
+      fullPath: '/admin/insights/'
+      preLoaderRoute: typeof AdminInsightsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/surveys/create': {
       id: '/admin/surveys/create'
       path: '/admin/surveys/create'
       fullPath: '/admin/surveys/create'
       preLoaderRoute: typeof AdminSurveysCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/insights/create': {
+      id: '/admin/insights/create'
+      path: '/admin/insights/create'
+      fullPath: '/admin/insights/create'
+      preLoaderRoute: typeof AdminInsightsCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/surveys/$surveyId/scoring': {
+      id: '/admin/surveys/$surveyId/scoring'
+      path: '/admin/surveys/$surveyId/scoring'
+      fullPath: '/admin/surveys/$surveyId/scoring'
+      preLoaderRoute: typeof AdminSurveysSurveyIdScoringRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/surveys/$surveyId/edit': {
+      id: '/admin/surveys/$surveyId/edit'
+      path: '/admin/surveys/$surveyId/edit'
+      fullPath: '/admin/surveys/$surveyId/edit'
+      preLoaderRoute: typeof AdminSurveysSurveyIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/insights/$insightId/edit': {
+      id: '/admin/insights/$insightId/edit'
+      path: '/admin/insights/$insightId/edit'
+      fullPath: '/admin/insights/$insightId/edit'
+      preLoaderRoute: typeof AdminInsightsInsightIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -313,8 +416,13 @@ const rootRouteChildren: RootRouteChildren = {
   InsightsRoute: InsightsRoute,
   Admin_layoutRoute: Admin_layoutRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminInsightsCreateRoute: AdminInsightsCreateRoute,
   AdminSurveysCreateRoute: AdminSurveysCreateRoute,
+  AdminInsightsIndexRoute: AdminInsightsIndexRoute,
   AdminSurveysIndexRoute: AdminSurveysIndexRoute,
+  AdminInsightsInsightIdEditRoute: AdminInsightsInsightIdEditRoute,
+  AdminSurveysSurveyIdEditRoute: AdminSurveysSurveyIdEditRoute,
+  AdminSurveysSurveyIdScoringRoute: AdminSurveysSurveyIdScoringRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
